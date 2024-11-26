@@ -1,7 +1,7 @@
 {
   "name": "be-airbnc-jamesd",
   "version": "1.0.0",
-  "description": "an airbnb-like app ",
+  "description": "an airbnb-like app",
   "main": "index.js",
   "scripts": {
     "test": "jest",
