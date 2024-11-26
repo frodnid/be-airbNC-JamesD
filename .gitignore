@@ -1,2 +1,3 @@
 project erd.pdf
 .env.test
+node_modules/
