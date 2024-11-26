@@ -4,7 +4,8 @@
   "description": "an airbnb-like app ",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "setup-db": "psql -f ./db/setup.sql"
   },
   "keywords": [
     "northcoders",
@@ -14,5 +15,13 @@
     "postgresql"
   ],
   "author": "James Dindorf",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
+  }
 }
