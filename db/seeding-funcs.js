@@ -73,15 +73,13 @@ exports.insertData = function () {
 		})
 		.then((userIDRef) => {
 			const formattedPropertiesData = propertiesData.map((property) => {
-				const { host_name, ...rest } = property;
-				const formattedObj = { ...rest, host_id: userIDRef[host_name] };
 				return [
-					formattedObj.host_id,
-					formattedObj.name,
-					formattedObj.location,
-					formattedObj.property_type,
-					formattedObj.price_per_night,
-					formattedObj.description,
+					userIDRef[property.host_name],
+					property.name,
+					property.location,
+					property.property_type,
+					property.price_per_night,
+					property.description,
 				];
 			});
 			return db.query(
@@ -93,17 +91,11 @@ exports.insertData = function () {
 		})
 		.then(([userIDRef, propertyIDRef]) => {
 			const formattedReviewsData = reviewsData.map((review) => {
-				const { guest_name, property_name, ...rest } = review;
-				const formattedObj = {
-					...rest,
-					guest_id: userIDRef[guest_name],
-					property_id: propertyIDRef[property_name],
-				};
 				return [
-					formattedObj.property_id,
-					formattedObj.guest_id,
-					formattedObj.rating,
-					formattedObj.comment,
+					propertyIDRef[review["property_name"]],
+					userIDRef[review["guest_name"]],
+					review.rating,
+					review.comment,
 				];
 			});
 			const formattedFavouritesData = favouritesData.map((favourite) => {
