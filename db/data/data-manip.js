@@ -1,5 +1,5 @@
 const db = require("../connection");
-const { createIDRef } = require("./utils");
+const { createRef } = require("./utils");
 
 exports.createUserIDRef = function () {
 	return db
@@ -10,7 +10,7 @@ exports.createUserIDRef = function () {
         FROM users;`
 		)
 		.then(({ rows }) => {
-			return createIDRef("full_name", "user_id", rows);
+			return createRef("full_name", "user_id", rows);
 		});
 };
 
@@ -23,6 +23,6 @@ exports.createPropertyIDRef = function () {
         FROM properties;`
 		)
 		.then(({ rows }) => {
-			return createIDRef("name", "property_id", rows);
+			return createRef("name", "property_id", rows);
 		});
 };
