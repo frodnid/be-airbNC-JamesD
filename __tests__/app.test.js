@@ -11,6 +11,22 @@ afterAll(()=> {
 })
 
 describe('app', () => {
+    describe('general 404 - invalid path', () => {
+        test('should respond with a status of 404 for invalid paths', () => {
+            return request(app)
+            .get("/api/where_am_i?")
+            .expect(404);
+        });
+        test('should respond with an appropriate error msg object', () => {
+            return request(app)
+            .get("/api/how_did_i_get_here")
+            .expect(404)
+            .expect("Content-Type", /json/)
+            .then(({body : {msg}}) => {
+                expect(msg).toBe("Path not found.")
+            })
+        });
+    });
     describe('/api/properties', () => {
         describe('GET', () => {
             test('200 - should respond with a JSON containing an array of property objects', () => {
@@ -94,6 +110,20 @@ describe('app', () => {
                     })
                 })
                 })
+            });
+        });
+        describe('INVALID METHOD', () => {
+            test('405 - should respond with an error msg for any invalid methods', () => {
+                const invalidMethods = ["post", "patch", "put", "delete"];
+                return Promise.all(invalidMethods.map((method) => {
+                    return request(app)
+                    [method]("/api/properties")
+                    .expect(405)
+                    .expect("Content-Type", /json/)
+                    .then(({ body: {msg}}) => {
+                        expect(msg).toBe("Method not allowed.")
+                    })
+                }))
             });
         });
     });
