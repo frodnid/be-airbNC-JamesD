@@ -122,6 +122,60 @@ describe("app", () => {
 						);
 					});
 			});
+			describe("url queries", () => {
+				test("?maxprice - should only respond with properties at or below a given price", () => {
+					return request(app)
+						.get("/api/properties?maxprice=100")
+						.expect(200)
+						.then(({ body: { properties } }) => {
+							properties.forEach((property) => {
+								expect(
+									+property.price_per_night
+								).toBeLessThanOrEqual(100);
+							});
+						});
+				});
+				test("?minprice - should only respond with properties at or above a given price", () => {
+					return request(app)
+						.get("/api/properties?minprice=110")
+						.expect(200)
+						.then(({ body: { properties } }) => {
+							properties.forEach((property) => {
+								expect(
+									+property.price_per_night
+								).toBeGreaterThanOrEqual(100);
+							});
+						});
+				});
+				test("?sort - should sort by cost if passed", () => {
+					return request(app)
+						.get("/api/properties?sort=price_per_night")
+						.expect(200)
+						.then(({ body: { properties } }) => {
+							expect(properties).toBeSortedBy("price_per_night");
+						});
+				});
+				test("?order - should order by a given direction (asc/desc)", () => {
+					return request(app)
+						.get("/api/properties?sort=price_per_night&order=desc")
+						.expect(200)
+						.then(({ body: { properties } }) => {
+							expect(properties).toBeSortedBy("price_per_night", {
+								descending: true,
+							});
+						});
+				});
+				test("?host - should filter results by a given host ID", () => {
+					return request(app)
+						.get("/api/properties?host=1")
+						.expect(200)
+						.then(({ body: { properties } }) => {
+							properties.forEach((property) => {
+								expect(property.host).toBe("Alice Johnson");
+							});
+						});
+				});
+			});
 		});
 		describe("INVALID METHOD", () => {
 			test("405 - should respond with an error msg for any invalid methods", () => {
