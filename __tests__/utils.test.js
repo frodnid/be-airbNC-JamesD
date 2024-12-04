@@ -1,7 +1,7 @@
-const { createIDRef } = require("../db/data/utils");
+const { createRef } = require("../db/data/utils");
 const { usersData } = require("../db/data/test");
-describe("createIDRef", () => {
-	const output = createIDRef("email", "first_name", usersData);
+describe("createRef", () => {
+	const output = createRef("email", "first_name", usersData);
 	test("should return an object", () => {
 		expect(typeof output).toBe("object");
 	});
@@ -31,7 +31,7 @@ describe("createIDRef", () => {
 			{ name: "banana", cost: 1.19 },
 			{ name: "avocado", cost: 1.99 },
 		];
-		expect(createIDRef("name", "cost", fruits)).toEqual({
+		expect(createRef("name", "cost", fruits)).toEqual({
 			apple: 0.99,
 			pear: 0.99,
 			banana: 1.19,
@@ -45,7 +45,7 @@ describe("createIDRef", () => {
 			{ name: "banana", cost: 1.19 },
 			{ name: "avocado", cost: 1.99 },
 		];
-		createIDRef("cost", "name", fruits);
+		createRef("cost", "name", fruits);
 
 		expect(fruits).toEqual([
 			{ name: "apple", cost: 0.99 },
