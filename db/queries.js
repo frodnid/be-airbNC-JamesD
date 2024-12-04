@@ -83,3 +83,15 @@ INSERT INTO favourites (
     guest_id,
     property_id)
 VALUES %L;`;
+
+
+exports.fetchPropertiesQuery = `
+SELECT property_id,
+    name AS property_name,
+    location,
+    price_per_night,
+    first_name || ' ' || surname AS host
+FROM properties
+JOIN users
+ON users.user_id = properties.host_id;
+    `
