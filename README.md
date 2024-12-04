@@ -9,5 +9,6 @@ The project is an AirBnB-like app using express and PostgreSQL for backend, deve
 ## **Using this Repo**
 Connection.js uses jest's automatic `NODE_ENV` variable to access PG credentials in a `.env.test` file.<br>
 Create this file in your local directory and add the following credentials to access the requisite database functions:<br>
-`PGDATABASE=airbnc_test`
+`PGDATABASE=airbnc_test`<br><br>
+To run the server locally, use command `npm run dev`. The server will listen on localhost port 9090.
 
