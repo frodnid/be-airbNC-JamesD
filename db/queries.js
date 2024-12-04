@@ -86,12 +86,23 @@ VALUES %L;`;
 
 
 exports.fetchPropertiesQuery = `
-SELECT property_id,
+WITH tmp AS (SELECT properties.property_id,
     name AS property_name,
     location,
     price_per_night,
-    first_name || ' ' || surname AS host
+    COUNT(guest_id), host_id
 FROM properties
-JOIN users
-ON users.user_id = properties.host_id;
+FULL JOIN favourites
+ON favourites.property_id = properties.property_id
+GROUP BY properties.property_id 
+ORDER BY COUNT(guest_id) DESC)
+
+SELECT property_id, 
+    property_name, 
+    location, 
+    price_per_night, 
+    first_name || ' ' || surname AS host 
+    FROM tmp
+    JOIN users
+    ON users.user_id = tmp.host_id;
     `

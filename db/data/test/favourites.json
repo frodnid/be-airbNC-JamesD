@@ -1,9 +1,5 @@
 [
   {
-    "guest_name": "Bob Smith",
-    "property_name": "Modern Apartment in City Center"
-  },
-  {
     "guest_name": "Rachel Cummings",
     "property_name": "Cosy Family House"
   },
@@ -32,11 +28,35 @@
     "property_name": "Spacious Countryside House"
   },
   {
+    "guest_name": "Rachel Cummings",
+    "property_name": "Spacious Countryside House"
+  },
+  {
     "guest_name": "Bob Smith",
     "property_name": "Cosy Loft in the Heart of the City"
   },
   {
+    "guest_name": "Isabella Martinez",
+    "property_name": "Cosy Loft in the Heart of the City"
+  },
+  {
+    "guest_name": "Rachel Cummings",
+    "property_name": "Cosy Loft in the Heart of the City"
+  },
+  {
     "guest_name": "Bob Smith",
+    "property_name": "Quaint Cottage in the Hills"
+  },
+  {
+    "guest_name": "Isabella Martinez",
+    "property_name": "Quaint Cottage in the Hills"
+  },
+  {
+    "guest_name": "Frank White",
+    "property_name": "Quaint Cottage in the Hills"
+  },
+  {
+    "guest_name": "Rachel Cummings",
     "property_name": "Quaint Cottage in the Hills"
   }
 ]

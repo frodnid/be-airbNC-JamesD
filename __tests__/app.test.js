@@ -111,6 +111,20 @@ describe('app', () => {
                 })
                 })
             });
+            test('properties array should be ordered from most-to-least favourited by default', () => {
+                return db.query(`
+                    INSERT INTO favourites (guest_id, property_id)
+                    VALUES (1, 10);`
+                ).then(()=> {
+                    return request(app)
+                    .get("/api/properties")
+                    .then(({body : { properties }}) => {
+                        console.log('properties:', properties)
+                        expect(properties[0].property_name).toBe("Quaint Cottage in the Hills");
+                        expect(properties[1].property_name).toBe("Cosy Loft in the Heart of the City");
+                    })
+                })
+            });
         });
         describe('INVALID METHOD', () => {
             test('405 - should respond with an error msg for any invalid methods', () => {
