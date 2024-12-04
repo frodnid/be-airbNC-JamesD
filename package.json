@@ -6,7 +6,8 @@
   "scripts": {
     "test": "jest",
     "setup-db": "psql -f ./db/setup.sql",
-    "seed": "node ./db/seed-run"
+    "seed": "node ./db/seed-run",
+    "dev": "node listen.js"
   },
   "keywords": [
     "northcoders",
