@@ -27,7 +27,15 @@ exports.fetchProperties = function (queries) {
 			minprice,
 			sort,
 			order
-		).then(({ rows }) => rows);
+		).then(({ rows }) => {
+			if (rows.length === 0) {
+				return Promise.reject({
+					status: 404,
+					msg: "No properties in price range.",
+				});
+			}
+			return rows;
+		});
 	} else {
 		const whereClause = `price_per_night <= %L AND price_per_night >= %L AND host_id = %L`;
 		const parametricQuery = `WHERE (${whereClause}) ORDER BY %I %s;`;
@@ -38,6 +46,14 @@ exports.fetchProperties = function (queries) {
 			host,
 			sort,
 			order
-		).then(({ rows }) => rows);
+		).then(({ rows }) => {
+			if (rows.length === 0) {
+				return Promise.reject({
+					status: 404,
+					msg: "ID not found.",
+				});
+			}
+			return rows;
+		});
 	}
 };

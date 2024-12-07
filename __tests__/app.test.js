@@ -123,7 +123,7 @@ describe("app", () => {
 					});
 			});
 			describe("url queries", () => {
-				test("?maxprice - should only respond with properties at or below a given price", () => {
+				test("maxprice - should only respond with properties at or below a given price", () => {
 					return request(app)
 						.get("/api/properties?maxprice=100")
 						.expect(200)
@@ -135,7 +135,7 @@ describe("app", () => {
 							});
 						});
 				});
-				test("?minprice - should only respond with properties at or above a given price", () => {
+				test("minprice - should only respond with properties at or above a given price", () => {
 					return request(app)
 						.get("/api/properties?minprice=110")
 						.expect(200)
@@ -147,7 +147,7 @@ describe("app", () => {
 							});
 						});
 				});
-				test("?sort - should sort by cost if passed", () => {
+				test("sort - should sort by cost if passed", () => {
 					return request(app)
 						.get("/api/properties?sort=price_per_night")
 						.expect(200)
@@ -155,7 +155,7 @@ describe("app", () => {
 							expect(properties).toBeSortedBy("price_per_night");
 						});
 				});
-				test("?order - should order by a given direction (asc/desc)", () => {
+				test("order - should order by a given direction (asc/desc)", () => {
 					return request(app)
 						.get("/api/properties?sort=price_per_night&order=desc")
 						.expect(200)
@@ -165,7 +165,7 @@ describe("app", () => {
 							});
 						});
 				});
-				test("?host - should filter results by a given host ID", () => {
+				test("host - should filter results by a given host ID", () => {
 					return request(app)
 						.get("/api/properties?host=1")
 						.expect(200)
@@ -173,6 +173,89 @@ describe("app", () => {
 							properties.forEach((property) => {
 								expect(property.host).toBe("Alice Johnson");
 							});
+						});
+				});
+				describe("400 - bad request", () => {
+					test("maxprice - invalid type", () => {
+						return request(app)
+							.get("/api/properties?maxprice=fish")
+							.expect(400)
+							.expect("Content-type", /json/)
+							.then(({ body: { msg } }) => {
+								expect(msg).toBe("Bad request.");
+							});
+					});
+					test("minprice - invalid type", () => {
+						return request(app)
+							.get("/api/properties?minprice=and-chips")
+							.expect(400)
+							.expect("Content-type", /json/)
+							.then(({ body: { msg } }) => {
+								expect(msg).toBe("Bad request.");
+							});
+					});
+					test("host - invalid type", () => {
+						return request(app)
+							.get("/api/properties?host=saveloy")
+							.expect(400)
+							.expect("Content-type", /json/)
+							.then(({ body: { msg } }) => {
+								expect(msg).toBe("Bad request.");
+							});
+					});
+					test("order - invalid type", () => {
+						return request(app)
+							.get("/api/properties?order=10")
+							.expect(400)
+							.expect("Content-type", /json/)
+							.then(({ body: { msg } }) => {
+								expect(msg).toBe("Bad request.");
+							});
+					});
+					test("order - invalid value", () => {
+						return request(app)
+							.get("/api/properties?order=what")
+							.expect(400)
+							.expect("Content-type", /json/)
+							.then(({ body: { msg } }) => {
+								expect(msg).toBe("Bad request.");
+							});
+					});
+					test("sort - invalid value", () => {
+						return request(app)
+							.get("/api/properties?sort=who")
+							.expect(400)
+							.expect("Content-type", /json/)
+							.then(({ body: { msg } }) => {
+								expect(msg).toBe("Bad request.");
+							});
+					});
+				});
+				test("404 - host id not found", () => {
+					return request(app)
+						.get("/api/properties?host=9999")
+						.expect(404)
+						.expect("Content-type", /json/)
+						.then(({ body: { msg } }) => {
+							expect(msg).toBe("ID not found.");
+						});
+				});
+				test("404 - maxprice too low", () => {
+					return request(app)
+						.get("/api/properties?maxprice=1")
+						.expect(404)
+						.expect("Content-type", /json/)
+						.then(({ body: { msg } }) => {
+							expect(msg).toBe("No properties in price range.");
+						});
+				});
+				test("404 - minprice too high", () => {
+					return request(app)
+						.get("/api/properties?minprice=99999")
+						.expect(404)
+						.expect("Content-type", /json/)
+						.then(({ body: { msg } }) => {
+							expect(msg).toBe("No properties in price range.");
 						});
 				});
 			});
