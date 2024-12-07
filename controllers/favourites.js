@@ -7,5 +7,7 @@ exports.postFavourite = function (req, res, next) {
 			msg: "Property favourited successfully.",
 			favourite_id,
 		});
-	});
+	}).catch((err) => {
+        next(err);
+    });
 };

@@ -57,7 +57,6 @@ exports.createTables = function () {
 			]);
 		});
 };
-insertUsersDataQuery, usersData.map((dataJSON) => Object.values(dataJSON));
 
 exports.insertData = function () {
 	return Promise.all([

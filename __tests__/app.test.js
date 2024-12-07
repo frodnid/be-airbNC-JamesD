@@ -322,7 +322,7 @@ describe("app", () => {
             });
             test('response object should contain a set success message and id of posted favourite', () => {
                 return request(app)
-                .post("/api/properties/9/favourite")
+                .post("/api/properties/1/favourite")
                 .send({ guest_id: 5 })
                 .expect(201)
                 .then(({ body: { msg, favourite_id } }) => {
@@ -330,6 +330,85 @@ describe("app", () => {
                     expect(favourite_id).toBe(16);
                 })
             });
+            describe('400 - Bad request', () => {
+                test('property id not in properties table ', () => {
+                    return request(app)
+                    .post("/api/properties/99999/favourite")
+                    .send({ guest_id : 1 })
+                    .expect(400)
+                    .expect("Content-type", /json/)
+                    .then(({ body : { msg }}) => {
+                        expect(msg).toBe("Bad request.")
+                    })
+                });
+                test('invalid property id type', () => {
+                    return request(app)
+                    .post("/api/properties/fish/favourite")
+                    .send({ guest_id : 1 })
+                    .expect(400)
+                    .expect("Content-type", /json/)
+                    .then(({ body : { msg }}) => {
+                        expect(msg).toBe("Bad request.")
+                    })
+                });
+                test('guest id not in guests table', () => {
+                    return request(app)
+                    .post("/api/properties/5/favourite")
+                    .send({ guest_id : 105 })
+                    .expect(400)
+                    .expect("Content-type", /json/)
+                    .then(({ body : { msg }}) => {
+                        expect(msg).toBe("Bad request.")
+                    })
+                });
+                test('invalid guest id type', () => {
+                    return request(app)
+                    .post("/api/properties/5/favourite")
+                    .send({ guest_id : "fish" })
+                    .expect(400)
+                    .expect("Content-type", /json/)
+                    .then(({ body : { msg }}) => {
+                        expect(msg).toBe("Bad request.")
+                    })
+                });
+                test('invalid body object key', () => {
+                    return request(app)
+                    .post("/api/properties/5/favourite")
+                    .send({ fish_id : 2 })
+                    .expect(400)
+                    .expect("Content-type", /json/)
+                    .then(({ body : { msg }}) => {
+                        expect(msg).toBe("Bad request.")
+                    })
+                });
+                
+            });
+            test('409 - property already favourited by user', () => {
+                return request(app)
+                .post("/api/properties/10/favourite")
+                .send({ guest_id: 6 })
+                .expect(409)
+                .expect("Content-type", /json/)
+                .then(({ body: {msg }}) => {
+                    expect(msg).toBe("Conflicting request.")
+                });
+            });
         });
+        describe("INVALID METHOD", () => {
+			test("405 - should respond with an error msg for any invalid methods", () => {
+				const invalidMethods = ["get", "patch", "put", "delete"];
+				return Promise.all(
+					invalidMethods.map((method) => {
+						return request(app)
+							[method]("/api/properties/1/favourite")
+							.expect(405)
+							.expect("Content-Type", /json/)
+							.then(({ body: { msg } }) => {
+								expect(msg).toBe("Method not allowed.");
+							});
+					})
+				);
+			});
+		});
     });
 });

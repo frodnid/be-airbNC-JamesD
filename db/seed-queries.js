@@ -41,7 +41,8 @@ exports.createFavouritesQuery = `
 CREATE TABLE favourites (
     favourite_id SERIAL PRIMARY KEY,
     guest_id INTEGER NOT NULL REFERENCES users(user_id),
-    property_id INTEGER NOT NULL REFERENCES properties
+    property_id INTEGER NOT NULL REFERENCES properties,
+    CONSTRAINT unique_favourite UNIQUE (guest_id, property_id)
 );`;
 
 exports.insertUsersDataQuery = `
