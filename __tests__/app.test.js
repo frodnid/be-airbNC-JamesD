@@ -130,7 +130,7 @@ describe("app", () => {
 						.then(({ body: { properties } }) => {
 							properties.forEach((property) => {
 								expect(
-									+property.price_per_night
+									property.price_per_night
 								).toBeLessThanOrEqual(100);
 							});
 						});
@@ -142,7 +142,7 @@ describe("app", () => {
 						.then(({ body: { properties } }) => {
 							properties.forEach((property) => {
 								expect(
-									+property.price_per_night
+									property.price_per_night
 								).toBeGreaterThanOrEqual(100);
 							});
 						});

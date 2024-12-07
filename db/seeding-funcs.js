@@ -18,8 +18,12 @@ const {
 	insertPropertyTypesDataQuery,
 	insertReviewsDataQuery,
 	insertFavouritesDataQuery,
-} = require("./queries");
+} = require("./seed-queries");
 const { createUserIDRef, createPropertyIDRef } = require("./data/data-manip");
+
+function queryFormat(query, data) {
+	return db.query(format(query, data));
+}
 
 exports.dropTables = function () {
 	return db
@@ -53,20 +57,17 @@ exports.createTables = function () {
 			]);
 		});
 };
+insertUsersDataQuery, usersData.map((dataJSON) => Object.values(dataJSON));
 
 exports.insertData = function () {
 	return Promise.all([
-		db.query(
-			format(
-				insertUsersDataQuery,
-				usersData.map((dataJSON) => Object.values(dataJSON))
-			)
+		queryFormat(
+			insertUsersDataQuery,
+			usersData.map((dataJSON) => Object.values(dataJSON))
 		),
-		db.query(
-			format(
-				insertPropertyTypesDataQuery,
-				propertyTypesData.map((dataJSON) => Object.values(dataJSON))
-			)
+		queryFormat(
+			insertPropertyTypesDataQuery,
+			propertyTypesData.map((dataJSON) => Object.values(dataJSON))
 		),
 	])
 		.then(() => {
@@ -83,8 +84,9 @@ exports.insertData = function () {
 					property.description,
 				];
 			});
-			return db.query(
-				format(insertPropertiesDataQuery, formattedPropertiesData)
+			return queryFormat(
+				insertPropertiesDataQuery,
+				formattedPropertiesData
 			);
 		})
 		.then(() => {
@@ -106,10 +108,8 @@ exports.insertData = function () {
 				];
 			});
 			return Promise.all([
-				db.query(format(insertReviewsDataQuery, formattedReviewsData)),
-				db.query(
-					format(insertFavouritesDataQuery, formattedFavouritesData)
-				),
+				queryFormat(insertReviewsDataQuery, formattedReviewsData),
+				queryFormat(insertFavouritesDataQuery, formattedFavouritesData),
 			]);
 		});
 };
