@@ -21,9 +21,9 @@ const {
 } = require("./seed-queries");
 const { createUserIDRef, createPropertyIDRef } = require("./data/data-manip");
 
-function queryFormat(query, data) {
+const queryFormat = function (query, data) {
 	return db.query(format(query, data));
-}
+};
 
 exports.dropTables = function () {
 	return db

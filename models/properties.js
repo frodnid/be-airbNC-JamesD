@@ -1,6 +1,8 @@
 const db = require("../db/connection");
 const format = require("pg-format");
-
+const queryFormat = function (query, ...args) {
+	return db.query(format(query, ...args));
+};
 const { fetchPropertiesQuery } = require("./queries");
 
 exports.fetchProperties = function (queries) {
@@ -15,35 +17,27 @@ exports.fetchProperties = function (queries) {
 		order = "asc",
 		host,
 	} = queries;
-    
+
 	if (!host) {
 		const whereClause = `price_per_night <= %L AND price_per_night >= %L`;
 		const parametricQuery = `WHERE (${whereClause}) ORDER BY %I %s;`;
-		return db
-			.query(
-				format(
-					`${fetchPropertiesQuery}${parametricQuery};`,
-					maxprice,
-					minprice,
-					sort,
-					order
-				)
-			)
-			.then(({ rows }) => rows);
+		return queryFormat(
+			`${fetchPropertiesQuery}${parametricQuery};`,
+			maxprice,
+			minprice,
+			sort,
+			order
+		).then(({ rows }) => rows);
 	} else {
 		const whereClause = `price_per_night <= %L AND price_per_night >= %L AND host_id = %L`;
 		const parametricQuery = `WHERE (${whereClause}) ORDER BY %I %s;`;
-		return db
-			.query(
-				format(
-					`${fetchPropertiesQuery}${parametricQuery}`,
-					maxprice,
-					minprice,
-					host,
-					sort,
-					order
-				)
-			)
-			.then(({ rows }) => rows);
+		return queryFormat(
+			`${fetchPropertiesQuery}${parametricQuery}`,
+			maxprice,
+			minprice,
+			host,
+			sort,
+			order
+		).then(({ rows }) => rows);
 	}
 };
