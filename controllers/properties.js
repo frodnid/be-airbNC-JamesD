@@ -21,3 +21,5 @@ exports.getProperties = function (req, res, next) {
 			});
 	}
 };
+
+
