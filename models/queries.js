@@ -19,3 +19,11 @@ FROM tmp
 JOIN users
 ON users.user_id = tmp.host_id
 `;
+
+exports.insertFavouriteQuery = `
+INSERT INTO favourites (
+    guest_id, 
+    property_id) 
+VALUES ($1, $2)
+RETURNING favourite_id;
+`
