@@ -35,26 +35,27 @@ exports.dropTables = function () {
 			return db.query(`DROP TABLE IF EXISTS properties;`);
 		})
 		.then(() => {
-			return Promise.all([
-				db.query(`DROP TABLE IF EXISTS users;`),
-				db.query(`DROP TABLE IF EXISTS property_types;`),
-			]);
+			return db.query(`DROP TABLE IF EXISTS users;`);
+		})
+		.then(() => {
+			return db.query(`DROP TABLE IF EXISTS property_types;`);
 		});
 };
 
 exports.createTables = function () {
-	return Promise.all([
-		db.query(createUsersQuery),
-		db.query(createPropertyTypesQuery),
-	])
+	return db
+		.query(createUsersQuery)
+		.then(() => {
+			return db.query(createPropertyTypesQuery);
+		})
 		.then(() => {
 			return db.query(createPropertiesQuery);
 		})
 		.then(() => {
-			return Promise.all([
-				db.query(createReviewsQuery),
-				db.query(createFavouritesQuery),
-			]);
+			return db.query(createReviewsQuery);
+		})
+		.then(() => {
+			return db.query(createFavouritesQuery);
 		});
 };
 
