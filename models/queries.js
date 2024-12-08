@@ -26,4 +26,9 @@ INSERT INTO favourites (
     property_id) 
 VALUES ($1, $2)
 RETURNING favourite_id;
-`
+`;
+exports.removeFavouriteQuery = `
+DELETE FROM favourites
+WHERE favourite_id = $1
+RETURNING *;
+`;

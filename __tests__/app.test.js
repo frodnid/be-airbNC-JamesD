@@ -410,4 +410,65 @@ describe("app", () => {
 			});
 		});
 	});
+	describe("/api/favourites/:id", () => {
+		describe("DELETE", () => {
+			test("204 - should respond with status code 204 on deletion", () => {
+				return request(app).delete("/api/favourites/2").expect(204);
+			});
+			test("response should have no body", () => {
+				return request(app)
+					.delete("/api/favourites/3")
+					.expect(204)
+					.then(({ body }) => {
+						expect(body).toEqual({});
+					});
+			});
+			test("should remove a favourite from the database using the parametric id", () => {
+				return request(app)
+					.delete("/api/favourites/3")
+					.expect(204)
+					.then(() => {
+						return db.query(`SELECT favourite_id FROM favourites;`);
+					})
+					.then(({ rows }) => {
+						expect(rows.length).toBe(14);
+						expect(rows).not.toContainEqual({ favourite_id: 3 });
+					});
+			});
+			test("404 - id not found", () => {
+				return request(app)
+					.delete("/api/favourites/91919191")
+					.expect(404)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("ID not found.");
+					});
+			});
+			test("400 - invalid id type", () => {
+				return request(app)
+					.delete("/api/favourites/colours")
+					.expect(400)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Bad request.");
+					});
+			});
+		});
+		describe("INVALID METHOD", () => {
+			test("405 - should respond with an error msg for any invalid methods", () => {
+				const invalidMethods = ["get", "patch", "put", "post"];
+				return Promise.all(
+					invalidMethods.map((method) => {
+						return request(app)
+							[method]("/api/favourites/1")
+							.expect(405)
+							.expect("Content-Type", /json/)
+							.then(({ body: { msg } }) => {
+								expect(msg).toBe("Method not allowed.");
+							});
+					})
+				);
+			});
+		});
+	});
 });
