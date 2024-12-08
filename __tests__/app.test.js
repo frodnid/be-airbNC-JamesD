@@ -277,6 +277,175 @@ describe("app", () => {
 			});
 		});
 	});
+	describe.only("/api/properties/:id", () => {
+		describe("GET", () => {
+			test("200 - should respond with a JSON containing a single property object", () => {
+				return request(app)
+					.get("/api/properties/10")
+					.expect(200)
+					.expect("Content-type", /json/)
+					.then(({ body }) => {
+						expect(typeof body.property).toBe("object");
+						expect(Array.isArray(body.property)).toBe(false);
+					});
+			});
+			test("property object should contain default db properties: id, location, description, price", () => {
+				return request(app)
+					.get("/api/properties/2")
+					.expect(200)
+					.then(({ body: { property } }) => {
+						expect(property).toHaveProperty("property_id");
+						expect(property).toHaveProperty("price_per_night");
+						expect(property).toHaveProperty("location");
+						expect(property).toHaveProperty("description");
+					});
+			});
+			test("property object should contain alias property: property_name", () => {
+				return request(app)
+					.get("/api/properties/2")
+					.expect(200)
+					.then(({ body: { property } }) => {
+						expect(property).toHaveProperty("property_name");
+						expect(property).not.toHaveProperty("name");
+					});
+			});
+			test("property object should contain custom properties: host, host_avatar, favourite_count", () => {
+				return request(app)
+					.get("/api/properties/11")
+					.expect(200)
+					.then(({ body: { property } }) => {
+						expect(property).toHaveProperty("host");
+						expect(property).toHaveProperty("host_avatar");
+						expect(property).toHaveProperty("favourite_count");
+					});
+			});
+			test("host property should contain first & surnames concatenated", () => {
+				return request(app)
+					.get("/api/properties/1")
+					.expect(200)
+					.then(({ body: { property } }) => {
+						expect(property.host).toBe("Alice Johnson");
+					});
+			});
+			test("favourite_count should contain the number of guest_ids in the favourites table at that property's id", () => {
+				return request(app)
+					.get("/api/properties/10")
+					.expect(200)
+					.then(({ body: { property } }) => {
+						expect(property.favourite_count).toBe(4);
+					});
+			});
+			test("should provide the most recent db data", () => {
+				const newProperty = [
+					1,
+					"Run Down Shack",
+					"Nowhere",
+					"House",
+					0.01,
+					"Don't stay here.",
+				];
+				return db
+					.query(
+						`INSERT INTO properties(host_id, name, location, property_type, price_per_night, description)
+					VALUES ($1, $2, $3, $4, $5, $6);`,
+						newProperty
+					)
+					.then(() => {
+						return request(app)
+							.get("/api/properties/12")
+							.expect(200);
+					})
+					.then(({ body: { property } }) => {
+						expect(property).toEqual({
+							property_id: 12,
+							property_name: "Run Down Shack",
+							location: "Nowhere",
+							price_per_night: 0.01,
+							description: "Don't stay here.",
+							host: "Alice Johnson",
+							host_avatar: "https://example.com/images/alice.jpg",
+							favourite_count: 0,
+						});
+					});
+			});
+			test("if passed a user_id query param, response object should include a favourited property", () => {
+				return request(app)
+					.get("/api/properties/10?user_id=4")
+					.expect(200)
+					.then(({ body: { property } }) => {
+						expect(property).toHaveProperty("favourited");
+					});
+			});
+			test("true - favourited property should include a boolean representing if a passed user_id has favourited a given property", () => {
+				return request(app)
+					.get("/api/properties/10?user_id=4")
+					.expect(200)
+					.then(({ body: { property } }) => {
+						expect(property.favourited).toBe(true);
+					});
+			});
+			test("false - favourited property should include a boolean representing if a passed user_id has favourited a given property", () => {
+				return request(app)
+					.get("/api/properties/1?user_id=5")
+					.expect(200)
+					.then(({ body: { property } }) => {
+						expect(property.favourited).toBe(false);
+					});
+			});
+			test("404 - property id not found ", () => {
+				return request(app)
+					.get("/api/properties/9999999")
+					.expect(404)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("ID not found.");
+					});
+			});
+			test("404 - user id not found ", () => {
+				return request(app)
+					.get("/api/properties/1?user_id=9999999")
+					.expect(404)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("ID not found.");
+					});
+			});
+			test("400 - invalid property id type", () => {
+				return request(app)
+					.get("/api/properties/building")
+					.expect(400)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Bad request.");
+					});
+			});
+			test("400 - invalid user id type", () => {
+				return request(app)
+					.get("/api/properties/1?user_id=me!")
+					.expect(400)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Bad request.");
+					});
+			});
+		});
+		describe("INVALID METHOD", () => {
+			test("405 - should respond with an error msg for any invalid methods", () => {
+				const invalidMethods = ["post", "patch", "put", "delete"];
+				return Promise.all(
+					invalidMethods.map((method) => {
+						return request(app)
+							[method]("/api/properties/1")
+							.expect(405)
+							.expect("Content-Type", /json/)
+							.then(({ body: { msg } }) => {
+								expect(msg).toBe("Method not allowed.");
+							});
+					})
+				);
+			});
+		});
+	});
 	describe("/api/properties/:id/favourite", () => {
 		describe("POST", () => {
 			test("201 - should respond with status 201 when sent a valid guest_id payload at a valid property_id", () => {

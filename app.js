@@ -6,13 +6,19 @@ const {
 	handleCustom404,
 	handleConflictingRequest,
 } = require("./controllers/errors");
-const { getProperties } = require("./controllers/properties");
+const { getProperties, getProperty } = require("./controllers/properties");
 const { postFavourite, deleteFavourite } = require("./controllers/favourites");
+
 const app = express();
 app.use(express.json());
 
 app.route("/api/properties")
 	.get(getProperties)
+	.all(handleMethodNotAllowed);
+
+
+app.route("/api/properties/:id")
+	.get(getProperty)
 	.all(handleMethodNotAllowed);
 
 app.route("/api/properties/:id/favourite")

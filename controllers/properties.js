@@ -1,4 +1,4 @@
-const { fetchProperties } = require("../models/properties");
+const { fetchProperties, fetchProperty } = require("../models/properties");
 const _ = require("lodash");
 exports.getProperties = function (req, res, next) {
 	const queries = req.query;
@@ -22,4 +22,14 @@ exports.getProperties = function (req, res, next) {
 	}
 };
 
-
+exports.getProperty = function (req, res, next) {
+	const { user_id } = req.query;
+	const property_id = req.params.id;
+	fetchProperty(property_id, user_id)
+		.then((property) => {
+			res.status(200).send({ property });
+		})
+		.catch((err) => {
+			next(err);
+		});
+};

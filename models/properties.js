@@ -1,9 +1,14 @@
 const db = require("../db/connection");
 const format = require("pg-format");
+const _ = require("lodash");
 const queryFormat = function (query, ...args) {
 	return db.query(format(query, ...args));
 };
-const { fetchPropertiesQuery } = require("./queries");
+const {
+	fetchPropertiesQuery,
+	fetchPropertyQueryStart,
+	fetchPropertyQueryEnd,
+} = require("./queries");
 
 exports.fetchProperties = function (queries) {
 	if (!queries) {
@@ -55,5 +60,54 @@ exports.fetchProperties = function (queries) {
 			}
 			return rows;
 		});
+	}
+};
+
+exports.fetchProperty = function (property_id, user_id) {
+	if (!user_id) {
+		return db
+			.query(`${fetchPropertyQueryStart} ${fetchPropertyQueryEnd}`, [property_id])
+			.then(({ rows }) => {
+				if (_.isEmpty(rows[0])) {
+					return Promise.reject({
+						status: 404,
+						msg: "ID not found.",
+					});
+				}
+				return rows[0];
+			});
+	} else {
+		const sqlCase = `
+		, CASE
+			WHEN NOT EXISTS (
+				SELECT 1
+				FROM users
+				WHERE user_id = $2
+				)
+				THEN NULL
+			WHEN EXISTS (
+				SELECT 1
+				FROM favourites
+				WHERE favourites.property_id = tmp.property_id
+				AND favourites.guest_id = $2
+				) 
+				THEN TRUE
+				ELSE FALSE
+			END AS favourited
+			`;
+
+		return db
+			.query(
+				`${fetchPropertyQueryStart} ${sqlCase} ${fetchPropertyQueryEnd}`, [property_id, user_id]
+			)
+			.then(({ rows }) => {
+				if (_.isEmpty(rows[0]) || rows[0].favourited === null) {
+					return Promise.reject({
+						status: 404,
+						msg: "ID not found.",
+					});
+				}
+				return rows[0];
+			});
 	}
 };

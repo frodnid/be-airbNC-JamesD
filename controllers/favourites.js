@@ -1,7 +1,7 @@
 const { insertFavourite, removeFavourite } = require("../models/favourites");
 exports.postFavourite = function (req, res, next) {
 	const { guest_id } = req.body;
-	const { id: property_id } = req.params;
+	const property_id = req.params.id;
 	insertFavourite(guest_id, property_id)
 		.then(({ favourite_id }) => {
 			res.status(201).send({
