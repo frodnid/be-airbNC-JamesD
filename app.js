@@ -7,6 +7,7 @@ const {
 	handleCustom404,
 	handleConflictingRequest,
 } = require("./controllers/errors");
+const { getUser } = require("./controllers/users")
 const { getProperties, getProperty } = require("./controllers/properties");
 const { postFavourite, deleteFavourite } = require("./controllers/favourites");
 const {
@@ -17,6 +18,10 @@ const {
 
 const app = express();
 app.use(express.json());
+
+app.route("/api/users/:id")
+	.get(getUser)
+	.all(handleMethodNotAllowed);
 
 app.route("/api/properties")
 	.get(getProperties)

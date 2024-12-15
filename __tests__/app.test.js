@@ -1012,16 +1012,90 @@ describe("app", () => {
 			});
 		});
 	});
-	describe('/api/users/:id', () => {
-		describe('GET', () => {
-			test('200 - should respond with a user object', () => {
+	describe.only("/api/users/:id", () => {
+		describe("GET", () => {
+			test("200 - should respond with a user object", () => {
 				return request(app)
-				.get("/api/users/1")
-				.expect(200)
-				.expect("Content-type", /json/)
-				.then(({ body: { user} }) => {
-					expect(typeof user).toBe("object");
-				})
+					.get("/api/users/1")
+					.expect(200)
+					.expect("Content-type", /json/)
+					.then(({ body: { user } }) => {
+						expect(typeof user).toBe("object");
+					});
+			});
+			test("user object should contain all default properties except: role", () => {
+				return request(app)
+					.get("/api/users/1")
+					.expect(200)
+					.expect("Content-type", /json/)
+					.then(({ body: { user } }) => {
+						expect(user).toHaveProperty("user_id");
+						expect(user).toHaveProperty("first_name");
+						expect(user).toHaveProperty("surname");
+						expect(user).toHaveProperty("email");
+						expect(user).toHaveProperty("phone_number");
+						expect(user).toHaveProperty("avatar");
+						expect(user).toHaveProperty("created_at");
+						expect(user).not.toHaveProperty("role");
+					});
+			});
+			test("should respond with the latest db data", () => {
+				return db
+					.query(
+						`INSERT INTO users (
+						first_name,
+						surname,
+						email,
+						role)
+					VALUES (
+						'Johnny',
+						'Twotimes',
+						'j.t@aol.com',
+						'guest')
+						;`
+					)
+					.then(() => {
+						return request(app).get("/api/users/7");
+					})
+					.then(({ body: { user } }) => {
+						expect(user).toHaveProperty("user_id", 7);
+						expect(user).toHaveProperty("first_name", "Johnny");
+						expect(user).toHaveProperty("email", "j.t@aol.com");
+					});
+			});
+			test("404 - user_id not found", () => {
+				return request(app)
+					.get("/api/users/9999999")
+					.expect(404)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("ID not found.");
+					});
+			});
+			test("400 - invalid user_id type", () => {
+				return request(app)
+					.get("/api/users/jeremy")
+					.expect(400)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Bad request.");
+					});
+			});
+		});
+		describe("INVALID METHOD", () => {
+			test("405 - should respond with an error msg for any invalid methods", () => {
+				const invalidMethods = ["post", "patch", "put", "delete"];
+				return Promise.all(
+					invalidMethods.map((method) => {
+						return request(app)
+							[method]("/api/users/1")
+							.expect(405)
+							.expect("Content-Type", /json/)
+							.then(({ body: { msg } }) => {
+								expect(msg).toBe("Method not allowed.");
+							});
+					})
+				);
 			});
 		});
 	});
