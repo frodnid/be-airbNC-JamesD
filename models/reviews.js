@@ -1,5 +1,9 @@
 const db = require("../db/connection");
-const { fetchPropertyReviewsQuery, insertReviewQuery } = require("./queries");
+const {
+	fetchPropertyReviewsQuery,
+	insertReviewQuery,
+	removeReviewQuery,
+} = require("./queries");
 
 exports.fetchPropertyReviews = function (id) {
 	return db.query(fetchPropertyReviewsQuery, [id]).then(({ rows }) => {
@@ -23,4 +27,15 @@ exports.insertReview = function (property_id, review) {
 		.then(({ rows }) => {
 			return rows[0];
 		});
+};
+
+exports.removeReview = function (id) {
+	return db.query(removeReviewQuery, [id]).then(({ rows }) => {
+		if (rows.length === 0) {
+			return Promise.reject({
+				status: 404,
+				msg: "ID not found.",
+			});
+		}
+	});
 };

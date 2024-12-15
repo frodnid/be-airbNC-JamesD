@@ -92,3 +92,9 @@ RETURNING
     comment,
     created_at;
     `;
+
+exports.removeReviewQuery = `
+DELETE FROM reviews
+WHERE review_id = $1
+RETURNING *;
+`;

@@ -1,4 +1,8 @@
-const { fetchPropertyReviews, insertReview } = require("../models/reviews");
+const {
+	fetchPropertyReviews,
+	insertReview,
+	removeReview,
+} = require("../models/reviews");
 
 exports.getPropertyReviews = function (req, res, next) {
 	const { id } = req.params;
@@ -17,6 +21,17 @@ exports.postPropertyReview = function (req, res, next) {
 	insertReview(id, payload)
 		.then((review) => {
 			res.status(201).send({ review });
+		})
+		.catch((err) => {
+			next(err);
+		});
+};
+
+exports.deleteReview = function (req, res, next) {
+	const { id } = req.params;
+	removeReview(id)
+		.then(() => {
+			res.status(204).send();
 		})
 		.catch((err) => {
 			next(err);

@@ -9,7 +9,11 @@ const {
 } = require("./controllers/errors");
 const { getProperties, getProperty } = require("./controllers/properties");
 const { postFavourite, deleteFavourite } = require("./controllers/favourites");
-const { getPropertyReviews, postPropertyReview } = require("./controllers/reviews");
+const {
+	getPropertyReviews,
+	postPropertyReview,
+	deleteReview,
+} = require("./controllers/reviews");
 
 const app = express();
 app.use(express.json());
@@ -17,7 +21,6 @@ app.use(express.json());
 app.route("/api/properties")
 	.get(getProperties)
 	.all(handleMethodNotAllowed);
-
 
 app.route("/api/properties/:id")
 	.get(getProperty)
@@ -34,6 +37,10 @@ app.route("/api/properties/:id/reviews")
 
 app.route("/api/favourites/:id")
 	.delete(deleteFavourite)
+	.all(handleMethodNotAllowed);
+
+app.route("/api/reviews/:id")
+	.delete(deleteReview)
 	.all(handleMethodNotAllowed);
 
 app.use(handleBadRequest);
