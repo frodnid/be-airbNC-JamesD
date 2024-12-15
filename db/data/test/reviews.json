@@ -64,5 +64,17 @@
     "property_name": "Luxury Penthouse with View",
     "rating": 1,
     "comment": "Comment about Luxury Penthouse with View: Disappointing experience. The penthouse was overpriced, and the service was poor."
+  },
+  {
+    "guest_name": "Frank White",
+    "property_name": "Charming Studio Retreat",
+    "rating": 5,
+    "comment": "Comment about Charming Studio Retreat: Loved the ambiance and decor."
+  },
+  {
+    "guest_name": "Rachel Cummings",
+    "property_name": "Charming Studio Retreat",
+    "rating": 5,
+    "comment": "Comment about Charming Studio Retreat: Was a tad mid."
   }
 ]

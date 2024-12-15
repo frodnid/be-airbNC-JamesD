@@ -7,9 +7,17 @@ exports.handleMethodNotAllowed = function (req, res, next) {
 };
 
 exports.handleBadRequest = function (err, req, res, next) {
-	const errorCodes = ["23502", "23503", "22P02", "42601", "42703"];
+	const errorCodes = ["23502", "22P02", "42601", "42703"];
 	if (errorCodes.includes(err.code)) {
 		res.status(400).send({ msg: "Bad request." });
+	} else {
+		next(err);
+	}
+};
+
+exports.handleForeignKey404 = function (err, req, res, next) {
+	if (err.code === "23503") {
+		res.status(404).send({ msg: "ID does not exist." });
 	} else {
 		next(err);
 	}

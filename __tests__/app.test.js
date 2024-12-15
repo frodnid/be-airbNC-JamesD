@@ -277,7 +277,7 @@ describe("app", () => {
 			});
 		});
 	});
-	describe.only("/api/properties/:id", () => {
+	describe("/api/properties/:id", () => {
 		describe("GET", () => {
 			test("200 - should respond with a JSON containing a single property object", () => {
 				return request(app)
@@ -499,31 +499,31 @@ describe("app", () => {
 						expect(favourite_id).toBe(16);
 					});
 			});
+			test("404 - guest_id not found", () => {
+				return request(app)
+					.post("/api/properties/5/favourite")
+					.send({ guest_id: 105 })
+					.expect(404)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("ID does not exist.");
+					});
+			});
+			test("404 - property_id not found", () => {
+				return request(app)
+					.post("/api/properties/99999/favourite")
+					.send({ guest_id: 1 })
+					.expect(404)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("ID does not exist.");
+					});
+			});
 			describe("400 - Bad request", () => {
-				test("property id not in properties table ", () => {
-					return request(app)
-						.post("/api/properties/99999/favourite")
-						.send({ guest_id: 1 })
-						.expect(400)
-						.expect("Content-type", /json/)
-						.then(({ body: { msg } }) => {
-							expect(msg).toBe("Bad request.");
-						});
-				});
 				test("invalid property id type", () => {
 					return request(app)
 						.post("/api/properties/fish/favourite")
 						.send({ guest_id: 1 })
-						.expect(400)
-						.expect("Content-type", /json/)
-						.then(({ body: { msg } }) => {
-							expect(msg).toBe("Bad request.");
-						});
-				});
-				test("guest id not in guests table", () => {
-					return request(app)
-						.post("/api/properties/5/favourite")
-						.send({ guest_id: 105 })
 						.expect(400)
 						.expect("Content-type", /json/)
 						.then(({ body: { msg } }) => {
@@ -630,6 +630,317 @@ describe("app", () => {
 					invalidMethods.map((method) => {
 						return request(app)
 							[method]("/api/favourites/1")
+							.expect(405)
+							.expect("Content-Type", /json/)
+							.then(({ body: { msg } }) => {
+								expect(msg).toBe("Method not allowed.");
+							});
+					})
+				);
+			});
+		});
+	});
+	describe("/api/properties/:id/reviews", () => {
+		describe("GET", () => {
+			test("200 - should respond with a JSON containing an array of review objects", () => {
+				return request(app)
+					.get("/api/properties/1/reviews")
+					.expect(200)
+					.expect("Content-type", /json/)
+					.then(({ body }) => {
+						expect(Array.isArray(body.reviews)).toBe(true);
+						body.reviews.forEach((review) => {
+							expect(typeof review).toBe("object");
+						});
+					});
+			});
+			test("should contain default db properties: id, comment, rating, timestamp", () => {
+				return request(app)
+					.get("/api/properties/1/reviews")
+					.expect(200)
+					.then(({ body: { reviews } }) => {
+						reviews.forEach((review) => {
+							expect(review).toHaveProperty("review_id");
+							expect(review).toHaveProperty("comment");
+							expect(review).toHaveProperty("rating");
+							expect(review).toHaveProperty("created_at");
+						});
+					});
+			});
+			test("should contain custom property: guest (first + last name)", () => {
+				const fullNameRegex = /^[A-Z][a-z]+ [A-Z][a-z]+$/;
+				return request(app)
+					.get("/api/properties/1/reviews")
+					.expect(200)
+					.then(({ body: { reviews } }) => {
+						reviews.forEach((review) => {
+							expect(review).toHaveProperty("guest");
+							expect(fullNameRegex.test(review.guest)).toBe(true);
+						});
+					});
+			});
+			test("should contain custom property: guest_avatar containing an image url", () => {
+				const imageUrlRegex =
+					/[(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)(\.jpg|\.png|\.webp|\.svg)/;
+				return request(app)
+					.get("/api/properties/1/reviews")
+					.expect(200)
+					.then(({ body: { reviews } }) => {
+						reviews.forEach((review) => {
+							expect(review).toHaveProperty("guest_avatar");
+							expect(
+								imageUrlRegex.test(review.guest_avatar)
+							).toBe(true);
+						});
+					});
+			});
+			test("array should only contain reviews from a passed parametric property ID", () => {
+				return request(app)
+					.get("/api/properties/1/reviews")
+					.expect(200)
+					.then(({ body: { reviews } }) => {
+						reviews.forEach((review) => {
+							expect(review.comment).toMatch(
+								/^Comment about Modern Apartment in City Center:/
+							);
+						});
+					});
+			});
+			test("should be ordered from latest to oldest by default", () => {
+				return db
+					.query(
+						`UPDATE reviews
+					SET created_at = '1999-12-15T14:27:12.516Z'
+					WHERE review_id = 2;`
+					)
+					.then(() => {
+						return request(app)
+							.get("/api/properties/1/reviews")
+							.expect(200);
+					})
+					.then(({ body: { reviews } }) => {
+						expect(reviews).toBeSortedBy("created_at", {
+							descending: true,
+						});
+					});
+			});
+			test("should respond with the latest db data", () => {
+				return db
+					.query(
+						`INSERT INTO reviews (
+							property_id,
+							guest_id,
+							rating,
+							comment)
+						VALUES (2, 2, 2, 'two');`
+					)
+					.then(() => {
+						return request(app)
+							.get("/api/properties/2/reviews")
+							.expect(200);
+					})
+					.then(({ body: { reviews } }) => {
+						expect(reviews).toContainEqual({
+							review_id: 14,
+							comment: "two",
+							rating: 2,
+							created_at: expect.any(String),
+							guest: "Bob Smith",
+							guest_avatar: "https://example.com/images/bob.jpg",
+						});
+					});
+			});
+			test("response object should contain further property: average_rating containing a given property's mean rating score", () => {
+				return request(app)
+					.get("/api/properties/1/reviews")
+					.expect(200)
+					.then(({ body: { average_rating } }) => {
+						expect(average_rating).toBe(2.5);
+					});
+			});
+			test("should repond with an average_rating to 1 dp", () => {
+				return request(app)
+					.get("/api/properties/5/reviews")
+					.expect(200)
+					.then(({ body: { average_rating } }) => {
+						expect(average_rating).toBe(4.7);
+					});
+			});
+			test("404 - property_id not found", () => {
+				return request(app)
+					.get("/api/properties/02394323/reviews")
+					.expect(404)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("ID not found.");
+					});
+			});
+			test("400 - invalid property_id", () => {
+				return request(app)
+					.get("/api/properties/**&&&/reviews")
+					.expect(400)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Bad request.");
+					});
+			});
+		});
+		describe("POST", () => {
+			test("201 - should respond with 201 when send a valid payload at a valid property_id", () => {
+				return request(app)
+					.post("/api/properties/8/reviews")
+					.send({
+						guest_id: 1,
+						rating: 5,
+						comment: "it's the best.",
+					})
+					.expect(201);
+			});
+			test("should add a favourite to the database", () => {
+				return request(app)
+					.post("/api/properties/8/reviews")
+					.send({
+						guest_id: 1,
+						rating: 5,
+						comment: "it's the best.",
+					})
+					.expect(201)
+					.then(() => {
+						return db.query(`SELECT * FROM reviews;`);
+					})
+					.then(({ rows }) => {
+						expect(rows.length).toBe(14);
+					});
+			});
+			test("should add the correct payload data to database", () => {
+				return request(app)
+					.post("/api/properties/8/reviews")
+					.send({
+						guest_id: 1,
+						rating: 5,
+						comment: "it's the best.",
+					})
+					.expect(201)
+					.then(() => {
+						return db.query(
+							`SELECT comment FROM reviews WHERE property_id = 8;`
+						);
+					})
+					.then(({ rows }) => {
+						expect(rows[0].comment).toBe("it's the best.");
+					});
+			});
+			test("response object should contain default db properties: review id, prop id, guest id, rating, comment, timestamp", () => {
+				return request(app)
+					.post("/api/properties/8/reviews")
+					.send({
+						guest_id: 1,
+						rating: 5,
+						comment: "it's the best.",
+					})
+					.expect(201)
+					.expect("Content-type", /json/)
+					.then(({ body: { review } }) => {
+						expect(review).toHaveProperty("review_id");
+						expect(review).toHaveProperty("property_id");
+						expect(review).toHaveProperty("guest_id");
+						expect(review).toHaveProperty("rating");
+						expect(review).toHaveProperty("comment");
+						expect(review).toHaveProperty("created_at");
+					});
+			});
+			test("response object should contain values from inserted review", () => {
+				return request(app)
+					.post("/api/properties/8/reviews")
+					.send({
+						guest_id: 1,
+						rating: 5,
+						comment: "it's the best.",
+					})
+					.expect(201)
+					.expect("Content-type", /json/)
+					.then(({ body: { review } }) => {
+						expect(review.review_id).toBe(14);
+						expect(review.guest_id).toBe(1);
+						expect(review.rating).toBe(5);
+					});
+			});
+			describe("400 Bad request", () => {
+				test("invalid guest_id", () => {
+					return request(app)
+						.post("/api/properties/1/reviews")
+						.send({
+							guest_id: 1.9,
+							rating: 3,
+							comment: "pretty nice.",
+						})
+						.expect(400)
+						.expect("Content-type", /json/)
+						.then(({ body: { msg } }) => {
+							expect(msg).toBe("Bad request.");
+						});
+				});
+				test("invalid rating", () => {
+					return request(app)
+						.post("/api/properties/1/reviews")
+						.send({
+							guest_id: 1,
+							rating: "amazing",
+							comment: "pretty nice.",
+						})
+						.expect(400)
+						.expect("Content-type", /json/)
+						.then(({ body: { msg } }) => {
+							expect(msg).toBe("Bad request.");
+						});
+				});
+				test("invalid property_id", () => {
+					return request(app)
+						.post("/api/properties/table/reviews")
+						.send({
+							guest_id: 1,
+							rating: 5,
+							comment: "pretty nice.",
+						})
+						.expect(400)
+						.expect("Content-type", /json/)
+						.then(({ body: { msg } }) => {
+							expect(msg).toBe("Bad request.");
+						});
+				});
+			});
+			test("404 - property_id not found", () => {
+				return request(app)
+					.post("/api/properties/10934596/reviews")
+					.send({ guest_id: 1, rating: 3, comment: "pretty nice." })
+					.expect(404)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("ID does not exist.");
+					});
+			});
+			test("404 - guest_id not found", () => {
+				return request(app)
+					.post("/api/properties/1/reviews")
+					.send({
+						guest_id: 100000000,
+						rating: 3,
+						comment: "pretty nice.",
+					})
+					.expect(404)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("ID does not exist.");
+					});
+			});
+		});
+		describe("INVALID METHOD", () => {
+			test("405 - should respond with an error msg for any invalid methods", () => {
+				const invalidMethods = ["patch", "put", "delete"];
+				return Promise.all(
+					invalidMethods.map((method) => {
+						return request(app)
+							[method]("/api/properties/1/reviews")
 							.expect(405)
 							.expect("Content-Type", /json/)
 							.then(({ body: { msg } }) => {

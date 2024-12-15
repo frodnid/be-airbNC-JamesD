@@ -62,3 +62,33 @@ DELETE FROM favourites
 WHERE favourite_id = $1
 RETURNING *;
 `;
+
+exports.fetchPropertyReviewsQuery = `
+SELECT review_id,
+    comment,
+    rating,
+    reviews.created_at,
+    first_name || ' ' || surname AS guest,
+    avatar AS guest_avatar
+FROM reviews
+JOIN users
+ON users.user_id = reviews.guest_id
+WHERE property_id = $1
+ORDER BY reviews.created_at DESC;
+`;
+
+exports.insertReviewQuery = `
+INSERT INTO reviews (
+    guest_id,
+    property_id,
+    rating,
+    comment)
+VALUES ($1, $2, $3, $4)
+RETURNING 
+    review_id,
+    property_id,
+    guest_id,
+    rating,
+    comment,
+    created_at;
+    `;
