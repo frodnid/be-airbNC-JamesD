@@ -1012,4 +1012,17 @@ describe("app", () => {
 			});
 		});
 	});
+	describe('/api/users/:id', () => {
+		describe('GET', () => {
+			test('200 - should respond with a user object', () => {
+				return request(app)
+				.get("/api/users/1")
+				.expect(200)
+				.expect("Content-type", /json/)
+				.then(({ body: { user} }) => {
+					expect(typeof user).toBe("object");
+				})
+			});
+		});
+	});
 });
