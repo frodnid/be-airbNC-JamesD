@@ -1012,7 +1012,7 @@ describe("app", () => {
 			});
 		});
 	});
-	describe.only("/api/users/:id", () => {
+	describe("/api/users/:id", () => {
 		describe("GET", () => {
 			test("200 - should respond with a user object", () => {
 				return request(app)
@@ -1082,9 +1082,166 @@ describe("app", () => {
 					});
 			});
 		});
+		describe("PATCH", () => {
+			describe("200 - should succesfully update passed property data in the db at a parametric user id", () => {
+				test("first_name", () => {
+					return request(app)
+						.patch("/api/users/1")
+						.send({ first_name: "Barry" })
+						.expect(200)
+						.then(() => {
+							return db.query(
+								`SELECT first_name FROM users WHERE user_id = 1;`
+							);
+						})
+						.then(({ rows }) => {
+							expect(rows[0].first_name).toBe("Barry");
+						});
+				});
+				test("surname", () => {
+					return request(app)
+						.patch("/api/users/2")
+						.send({ surname: "Also Barry" })
+						.expect(200)
+						.then(() => {
+							return db.query(
+								`SELECT surname FROM users WHERE user_id = 2;`
+							);
+						})
+						.then(({ rows }) => {
+							expect(rows[0].surname).toBe("Also Barry");
+						});
+				});
+				test("email", () => {
+					return request(app)
+						.patch("/api/users/3")
+						.send({ email: "j@k.com" })
+						.expect(200)
+						.then(() => {
+							return db.query(
+								`SELECT email FROM users WHERE user_id = 3;`
+							);
+						})
+						.then(({ rows }) => {
+							expect(rows[0].email).toBe("j@k.com");
+						});
+				});
+				test("phone", () => {
+					return request(app)
+						.patch("/api/users/4")
+						.send({ phone: "+49123456790" })
+						.expect(200)
+						.then(() => {
+							return db.query(
+								`SELECT phone_number FROM users WHERE user_id = 4;`
+							);
+						})
+						.then(({ rows }) => {
+							expect(rows[0].phone_number).toBe("+49123456790");
+						});
+				});
+				test("avatar", () => {
+					return request(app)
+						.patch("/api/users/5")
+						.send({ avatar: "https://cats.com/pic.png" })
+						.expect(200)
+						.then(() => {
+							return db.query(
+								`SELECT avatar FROM users WHERE user_id = 5;`
+							);
+						})
+						.then(({ rows }) => {
+							expect(rows[0].avatar).toBe(
+								"https://cats.com/pic.png"
+							);
+						});
+				});
+			});
+			test("should correctly update user data when passed multiple properties in request body in arbitrary order", () => {
+				return request(app)
+					.patch("/api/users/1")
+					.send({
+						surname: "Allen",
+						phone: "12345",
+						email: "b.a@a.com",
+						first_name: "Barry",
+					})
+					.expect(200)
+					.then(() => {
+						return db.query(
+							`SELECT * FROM users WHERE user_id = 1;`
+						);
+					})
+					.then(({ rows }) => {
+						expect(rows[0].first_name).toBe("Barry");
+						expect(rows[0].surname).toBe("Allen");
+						expect(rows[0].phone_number).toBe("12345");
+						expect(rows[0].email).toBe("b.a@a.com");
+					});
+			});
+			test("should respond with a user object", () => {
+				return request(app)
+					.patch("/api/users/1")
+					.send({ phone: "1" })
+					.expect(200)
+					.expect("Content-type", /json/)
+					.then(({ body: { user } }) => {
+						expect(typeof user).toBe("object");
+					});
+			});
+			test("response object should contain a full db entry for the updated user", () => {
+				return request(app)
+					.patch("/api/users/1")
+					.send({ phone: "1", first_name: "Walter" })
+					.expect(200)
+					.expect("Content-type", /json/)
+					.then(({ body: { user } }) => {
+						expect(user).toEqual({
+							user_id: 1,
+							first_name: "Walter",
+							surname: "Johnson",
+							email: "alice@example.com",
+							phone_number: "1",
+							role: "host",
+							avatar: "https://example.com/images/alice.jpg",
+							created_at: expect.any(String),
+						});
+					});
+			});
+			test("400 - invalid body property", () => {
+				return request(app)
+					.patch("/api/users/1")
+					.send({ chocolate: "bar" })
+					.expect(400)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Bad request.");
+					});
+			});
+			test("404 - user_id not found", () => {
+				return request(app)
+					.patch("/api/users/1999999")
+					.send({ phone: "bar" })
+					.expect(404)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("ID not found.");
+					});
+			});
+			test("400 - invalid user_id", () => {
+				return request(app)
+					.patch("/api/users/fishcakes")
+					.send({ phone: "bar" })
+					.expect(400)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Bad request.");
+					});
+			});
+		});
 		describe("INVALID METHOD", () => {
 			test("405 - should respond with an error msg for any invalid methods", () => {
-				const invalidMethods = ["post", "patch", "put", "delete"];
+				const invalidMethods = ["post", "put", "delete"];
 				return Promise.all(
 					invalidMethods.map((method) => {
 						return request(app)

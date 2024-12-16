@@ -10,6 +10,13 @@ FROM users
 WHERE user_id = $1;
 `;
 
+exports.updateUserQuery = `
+UPDATE users
+SET first_name = $2,
+    surname = $3
+WHERE user_id = $1;
+`;
+
 exports.fetchPropertiesQuery = `
 WITH tmp AS (SELECT properties.property_id,
     name AS property_name,

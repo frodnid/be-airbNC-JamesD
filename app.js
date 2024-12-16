@@ -7,7 +7,7 @@ const {
 	handleCustom404,
 	handleConflictingRequest,
 } = require("./controllers/errors");
-const { getUser } = require("./controllers/users")
+const { getUser, patchUser } = require("./controllers/users")
 const { getProperties, getProperty } = require("./controllers/properties");
 const { postFavourite, deleteFavourite } = require("./controllers/favourites");
 const {
@@ -21,6 +21,7 @@ app.use(express.json());
 
 app.route("/api/users/:id")
 	.get(getUser)
+	.patch(patchUser)
 	.all(handleMethodNotAllowed);
 
 app.route("/api/properties")
