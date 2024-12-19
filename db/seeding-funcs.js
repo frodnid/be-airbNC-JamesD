@@ -1,12 +1,13 @@
 const db = require("./connection");
 const format = require("pg-format");
+const ENV = process.env.NODE_ENV || "dev";
 const {
 	usersData,
 	propertiesData,
 	propertyTypesData,
 	reviewsData,
 	favouritesData,
-} = require("./data/test");
+} = require(`${__dirname}/data/${ENV}`);
 const {
 	createUsersQuery,
 	createPropertiesQuery,

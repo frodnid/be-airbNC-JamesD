@@ -1,9 +1,9 @@
+process.env.NODE_ENV = "test"
 const {
 	createUserIDRef,
 	createPropertyIDRef,
 } = require("../db/data/data-manip");
 const db = require("../db/connection");
-
 afterAll(() => {
 	return db.end();
 });
