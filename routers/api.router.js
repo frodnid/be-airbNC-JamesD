@@ -4,12 +4,18 @@ const favouritesRouter = require("./favourites.router");
 const propertiesRouter = require("./properties.router");
 const usersRouter = require("./users.router");
 const reviewsRouter = require("./reviews.router");
-
+const viewsAbsolutePath = path.join(__dirname, "../views");
 const apiRouter = express.Router();
 
 apiRouter.get("/", (req, res) => {
 	res.sendFile("index.html", {
-		root: path.join(__dirname, "../views"),
+		root: viewsAbsolutePath,
+	});
+});
+
+apiRouter.get("/api-docs.css", (req, res) => {
+	res.sendFile("api-docs.css", {
+		root: viewsAbsolutePath,
 	});
 });
 
