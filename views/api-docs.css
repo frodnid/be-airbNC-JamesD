@@ -1,0 +1,63 @@
+body {
+    background-color: rgb(249, 248, 252);
+    margin-left: 1rem;
+    margin-right: 1rem;
+}
+
+h1 {
+    padding-top: 20px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 4rem;
+    text-align: center;
+    text-shadow: 0.1rem 0.1rem 0.1rem rgba(128, 128, 128, 0.103);
+
+}
+
+h2 {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 2rem;
+    text-align: center;
+    text-shadow: 0.05rem 0.05rem 0.05rem rgba(128, 128, 128, 0.034);
+}
+
+h3 {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 1.8rem;
+    margin-left: 1.5rem;
+    padding-bottom: 0.5rem;
+    padding-top: 0.5rem;
+}
+
+h4 {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 1.2rem;
+    padding-bottom: 0.5rem;
+    padding-top: 0.5rem;
+}
+
+span.hilight {
+    background-color: gold;
+    padding: 5px;
+}
+
+p {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 1rem;
+}
+
+li {
+    font-family: 'Courier New', Courier, monospace
+}
+
+pre.code_snippet {
+    color: aliceblue;
+}
+
+div.code_block {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    margin-right: 75%;
+    border-radius: 0.66rem;
+    background-color: black;
+
+}
