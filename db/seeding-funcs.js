@@ -7,6 +7,7 @@ const {
 	propertyTypesData,
 	reviewsData,
 	favouritesData,
+	imagesData,
 } = require(`${__dirname}/data/${ENV}`);
 const {
 	createUsersQuery,
@@ -14,11 +15,13 @@ const {
 	createPropertyTypesQuery,
 	createReviewsQuery,
 	createFavouritesQuery,
+	createImagesQuery,
 	insertUsersDataQuery,
 	insertPropertiesDataQuery,
 	insertPropertyTypesDataQuery,
 	insertReviewsDataQuery,
 	insertFavouritesDataQuery,
+	insertImagesDataQuery,
 } = require("./seed-queries");
 const { createUserIDRef, createPropertyIDRef } = require("./data/data-manip");
 
@@ -29,6 +32,9 @@ const queryFormat = function (query, data) {
 exports.dropTables = function () {
 	return db
 		.query(`DROP TABLE IF EXISTS reviews;`)
+		.then(() => {
+			return db.query(`DROP TABLE IF EXISTS images;`);
+		})
 		.then(() => {
 			return db.query(`DROP TABLE IF EXISTS favourites;`);
 		})
@@ -57,6 +63,9 @@ exports.createTables = function () {
 		})
 		.then(() => {
 			return db.query(createFavouritesQuery);
+		})
+		.then(() => {
+			return db.query(createImagesQuery);
 		});
 };
 
@@ -85,15 +94,16 @@ exports.insertData = function () {
 					property.description,
 				];
 			});
-			return queryFormat(
-				insertPropertiesDataQuery,
-				formattedPropertiesData
-			);
+			return Promise.all([
+				userIDRef,
+				queryFormat(insertPropertiesDataQuery, formattedPropertiesData),
+			]);
 		})
-		.then(() => {
-			return Promise.all([createUserIDRef(), createPropertyIDRef()]);
+		.then(([userIDRef]) => {
+			return Promise.all([userIDRef, createPropertyIDRef()]);
 		})
-		.then(([userIDRef, propertyIDRef]) => {
+		.then((refs) => {
+			const [userIDRef, propertyIDRef] = refs;
 			const formattedReviewsData = reviewsData.map((review) => {
 				return [
 					propertyIDRef[review["property_name"]],
@@ -109,8 +119,20 @@ exports.insertData = function () {
 				];
 			});
 			return Promise.all([
+				refs,
 				queryFormat(insertReviewsDataQuery, formattedReviewsData),
 				queryFormat(insertFavouritesDataQuery, formattedFavouritesData),
 			]);
+		})
+		.then(([refs]) => {
+			const propertyIDRef = refs[1];
+			const formattedImagesData = imagesData.map((image) => {
+				return [
+					propertyIDRef[image["property_name"]],
+					image.image_url,
+					image.alt_tag,
+				];
+			});
+			return queryFormat(insertImagesDataQuery, formattedImagesData);
 		});
 };

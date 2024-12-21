@@ -45,6 +45,15 @@ CREATE TABLE favourites (
     CONSTRAINT unique_favourite UNIQUE (guest_id, property_id)
 );`;
 
+exports.createImagesQuery = `
+CREATE TABLE images (
+    image_id SERIAL PRIMARY KEY,
+    property_id INTEGER NOT NULL REFERENCES properties,
+    image_url VARCHAR NOT NULL,
+    alt_text VARCHAR NOT NULL
+    );
+`;
+
 exports.insertUsersDataQuery = `
 INSERT INTO users
     (first_name,
@@ -85,4 +94,10 @@ INSERT INTO favourites (
     property_id)
 VALUES %L;`;
 
-
+exports.insertImagesDataQuery = `
+INSERT INTO images (
+    property_id,
+    image_url,
+    alt_text)
+VALUES %L;
+`;
