@@ -11,23 +11,32 @@ WHERE user_id = $1;
 `;
 
 exports.fetchPropertiesQuery = `
-WITH tmp AS (SELECT properties.property_id,
-    name AS property_name,
-    location,
-    price_per_night,
-    COUNT(guest_id) AS popularity,
-    host_id
-FROM properties
-FULL JOIN favourites
-ON favourites.property_id = properties.property_id
-GROUP BY properties.property_id 
-ORDER BY popularity DESC)
+WITH tmp AS (
+    SELECT 
+        properties.property_id,
+        name AS property_name,
+        location,
+        price_per_night,
+        COUNT(favourites.guest_id) AS popularity,
+        host_id
+    FROM properties
+    LEFT JOIN favourites
+    ON favourites.property_id = properties.property_id
+    GROUP BY properties.property_id, name, location, price_per_night, host_id
+    ORDER BY popularity DESC
+)
 
-SELECT property_id, 
+SELECT 
+    tmp.property_id, 
     property_name, 
     location, 
     price_per_night::FLOAT, 
-    first_name || ' ' || surname AS host 
+    first_name || ' ' || surname AS host,
+    (SELECT image_url
+    FROM images
+    WHERE images.property_id = tmp.property_id
+    ORDER BY image_id
+    LIMIT 1 ) AS image_url
 FROM tmp
 JOIN users
 ON users.user_id = tmp.host_id
@@ -42,25 +51,30 @@ WITH tmp AS (SELECT properties.property_id,
     COUNT(guest_id)::INT AS favourite_count,
     host_id
 FROM properties
-FULL JOIN favourites
+LEFT JOIN favourites
 ON favourites.property_id = properties.property_id
 WHERE properties.property_id = $1
 GROUP BY properties.property_id 
 )
 
-SELECT property_id, 
+SELECT tmp.property_id, 
     property_name, 
     location, 
     price_per_night::FLOAT,
     description, 
     first_name || ' ' || surname AS host,
     avatar AS host_avatar,
-    favourite_count
+    favourite_count,
+    COALESCE(ARRAY_AGG(image_url), '{}'::VARCHAR[]) AS images
 `;
 exports.fetchPropertyQueryEnd = `
 FROM tmp
 JOIN users
-ON users.user_id = tmp.host_id`;
+ON users.user_id = tmp.host_id
+LEFT JOIN images
+ON images.property_id = tmp.property_id
+GROUP BY tmp.property_id, property_name, location, price_per_night, description, host, host_avatar, favourite_count;
+`;
 
 exports.insertFavouriteQuery = `
 INSERT INTO favourites (

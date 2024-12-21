@@ -86,6 +86,16 @@ describe("app", () => {
 						});
 					});
 			});
+			test("property objects should contain custom property: image_url", () => {
+				return request(app)
+					.get("/api/properties")
+					.expect(200)
+					.then(({ body: { properties } }) => {
+						properties.forEach((property) => {
+							expect(property).toHaveProperty("image_url");
+						});
+					});
+			});
 			test("should provide the most recent db data", () => {
 				return db
 					.query(
@@ -309,7 +319,7 @@ describe("app", () => {
 						expect(property).not.toHaveProperty("name");
 					});
 			});
-			test("property object should contain custom properties: host, host_avatar, favourite_count", () => {
+			test("property object should contain custom properties: host, host_avatar, favourite_count, images", () => {
 				return request(app)
 					.get("/api/properties/11")
 					.expect(200)
@@ -317,6 +327,7 @@ describe("app", () => {
 						expect(property).toHaveProperty("host");
 						expect(property).toHaveProperty("host_avatar");
 						expect(property).toHaveProperty("favourite_count");
+						expect(property).toHaveProperty("images");
 					});
 			});
 			test("host property should contain first & surnames concatenated", () => {
@@ -365,6 +376,7 @@ describe("app", () => {
 							host: "Alice Johnson",
 							host_avatar: "https://example.com/images/alice.jpg",
 							favourite_count: 0,
+							images: [null],
 						});
 					});
 			});

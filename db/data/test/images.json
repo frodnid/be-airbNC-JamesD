@@ -6,7 +6,7 @@
   },
   {
     "property_name": "Modern Apartment in City Center",
-    "image_url": "https://example.com/images/modern_apartment_3.jpg",
+    "image_url": "https://example.com/images/modern_apartment_2.jpg",
     "alt_tag": "Alt tag for Modern Apartment in City Center 2"
   },
   {
@@ -58,5 +58,10 @@
     "property_name": "Quaint Cottage in the Hills",
     "image_url": "https://example.com/images/quaint_cottage_1.jpg",
     "alt_tag": "Alt tag for Quaint Cottage in the Hills"
+  },
+  {
+    "property_name": "Quaint Cottage in the Hills",
+    "image_url": "https://example.com/images/quaint_cottage_2.jpg",
+    "alt_tag": "Alt tag for Quaint Cottage in the Hills 2"
   }
 ]
