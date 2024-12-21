@@ -1,6 +1,6 @@
 const db = require("./connection");
 const format = require("pg-format");
-const ENV = process.env.NODE_ENV || "dev";
+const ENV = process.env.NODE_ENV || "development";
 const {
 	usersData,
 	propertiesData,
