@@ -1,189 +1,220 @@
 <!DOCTYPE html>
 <html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="stylesheet" href="./api-docs.css" />
+		<title>James D - airbnb-esque api</title>
+	</head>
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="./api-docs.css" />
-    <title>Document</title>
-</head>
+	<body>
+		<h1>AirBnB-esque</h1>
+		<h2>
+			A demo airbnb-like app built for the northcoders backend portfolio
+			project.
+		</h2>
+		<br />
+		<div>
+			<h3>/api/properties</h3>
+			<h4 class="method"><span class="hilight">GET</span></h4>
+			<div class="method_description">
+				<p>
+					Reponds with a list of property JSONs, ordered by
+					popularity:
+				</p>
+				<div class="code_block">
+					<pre class="code_snippet">
+                    {
+                        "properties": [
+                          {
+                            "property_id": <span class="type">integer</span>,
+                            "property_name": <span class="type">string</span>,
+                            "location": <span class="type">string</span>,
+                            "price_per_night": <span class="type">float</span>,
+                            "host": <span class="type">string</span>
+                          },
+                          ...
+                        ]
+                    }</pre>
+				</div>
 
-<body>
-    <h1>AirBnB-esque</h1>
-    <h2>
-        A demo airbnb-like app built for the northcoders backend portfolio
-        project.
-    </h2>
-    <br />
-    <div>
-        <h3>/api/properties</h3>
-        <h4><span class="hilight">GET</span></h4>
-        <p>Reponds with a list of property JSONs, ordered by popularity:</p>
-        <div class="code_block">
-            <pre class="code_snippet">
+				<h4>Queries:</h4>
+				<ul>
+					<li>sort: popularity | cost_per_night</li>
+					<li>order: asc | desc</li>
+					<li>maxprice: integer</li>
+					<li>minprice: integer</li>
+					<li>host_id: integer</li>
+				</ul>
+			</div>
+		</div>
+		<div>
+			<h3>/api/properties/:id</h3>
+			<h4 class="method"><span class="hilight">GET</span></h4>
+			<div class="method_description">
+				<p>Responds with a property JSON:</p>
+				<div class="code_block">
+					<pre class="code_snippet">
+                {  
+                    "property_id": <span class="type">integer</span>,
+                    "property_name": <span class="type">string</span>,
+                    "location": <span class="type">string</span>,
+                    "price_per_night": <span class="type">float</span>,
+                    "description": <span class="type">string</span>,
+                    "host": <span class="type">string</span>,
+                    "host_avatar" <span class="type">string (url)</span>,
+                    "favourite_count": <span class="type">integer</span>
+                }
+            </pre>
+				</div>
+				<h4>Queries:</h4>
+				<ul>
+					<li>user_id: integer</li>
+				</ul>
+				<br />
+				<p>
+					Optional user_id query will add a 'favourited' property to
+					response object. This represents whether a property is
+					favourited by a given user:
+				</p>
+				<div class="code_block">
+					<pre class="code_snippet">
                 {
-                    "properties": [
+                    "property":   {
+                     // regular fields...,
+                     "favourited": <span class="type">boolean</span>
+                    }
+                }</pre>
+				</div>
+			</div>
+		</div>
+		<br />
+		<div>
+			<h3>/api/properties/:id/reviews</h3>
+			<h4 class="method"><span class="hilight">GET</span></h4>
+			<div class="method_description">
+				<p>
+					Responds with an array of review JSONs and an average
+					rating:
+				</p>
+				<div class="code_block">
+					<pre class="code_snippet">
+                {
+                    "reviews": [
                       {
-                        "property_id": integer,
-                        "property_name": string,
-                        "location": string,
-                        "price_per_night": float,
-                        "host": string
+                        "review_id": <span class="type">integer</span>,
+                        "comment": <span class="type">string</span>,
+                        "rating": <span class="type">integer</span>,
+                        "created_at": <span class="type">date</span>,
+                        "guest": <span class="type">string</span>,
+                        "guest_avatar" <span class="type">string (url)</span>
                       },
                       ...
-                    ]
-                }</pre>
-        </div>
+                    ],
 
+                    "average_rating": <span class="type">float</span>
+                  }
+            </pre>
+				</div>
+			</div>
 
-        <h4>Queries:</h4>
-        <ul>
-            <li>sort: popularity | cost_per_night</li>
-            <li>order: asc | desc</li>
-            <li>maxprice: integer</li>
-            <li>minprice: integer</li>
-            <li>host_id: integer</li>
-        </ul>
-    </div>
-    <div>
-        <h3>/api/properties/:id</h3>
-        <h4><span class="hilight">GET</span></h4>
-        <p>Responds with a property JSON:</p>
-        <div class="code_block">
-            <pre class="code_snippet">
-            {  
-                "property_id": integer,
-                "property_name": string,
-                "location": string,
-                "price_per_night": float,
-                "description": string,
-                "host": string,
-                "host_avatar" string (url),
-                "favourite_count": integer
-            }
-        </pre>
-        </div>
-        <h4>Queries:</h4>
-        <ul>
-            <li>user_id</li>
-        </ul>
-        <p>
-            Optional user_id query will add a 'favourited' property to response object.
-            This represents whether a property is favourited by
-            a given user:
-        </p>
-        <div class="code_block">
-            <pre class="code_snippet">
-            {
-                "property":   {
-                 // regular fields...,
-                 "favourited": boolean
+			<h4 class="method"><span class="hilight">POST</span></h4>
+			<div class="method_description">
+				<p>Accepts a review payload with the following shape:</p>
+				<div class="code_block">
+					<pre class="code_snippet">
+                {
+                    "guest_id": <span class="type">integer</span>,
+                    "rating": <span class="type">integer</span>,
+                    "comment": <span class="type">string</span>
                 }
-            }</pre>
-        </div>
+            </pre>
+				</div>
+				<p>Responds with the newly created review.</p>
+			</div>
+		</div>
+		<br />
+		<div>
+			<h3>/api/properties/:id/favourite</h3>
+			<h4 class="method"><span class="hilight">POST</span></h4>
+			<div class="method_description">
+				<p>Accepts a guest_id JSON:</p>
+				<div class="code_block">
+					<pre class="code_snippet">
+                {
+                    "guest_id": <span class="type">integer</span>
+                }
+            </pre>
+				</div>
+				<p>Response:</p>
+				<div class="code_block">
+					<pre class="code_snippet">
+                {
+                    "msg": "Property favourited successfully.",
+                    "favorite_id": <span class="type">integer</span>
+                }</pre>
+				</div>
+			</div>
+		</div>
+		<br />
+		<div>
+			<h3>/api/favourites/:id</h3>
+			<h4 class="method"><span class="hilight">DELETE</span></h4>
+			<div class="method_description">
+				<p>Removes a favourite at a parametric property ID.</p>
+			</div>
+		</div>
+		<br />
+		<div>
+			<h3>/api/reviews/:id</h3>
+			<h4 class="method"><span class="hilight">DELETE</span></h4>
+			<div class="method_description">
+				<p>Removes a review at a parametric property ID.</p>
+			</div>
+		</div>
+		<br />
+		<div>
+			<h3>/api/users/:id</h3>
+			<h4 class="method"><span class="hilight">GET</span></h4>
+			<div class="method_description">
+				<p>Reponds with a single user JSON at a parametric user ID:</p>
+				<div class="code_block">
+					<pre class="code_snippet">
+                {
+                    "user":  {
+                        "user_id": <span class="type">integer</span>,
+                        "first_name": <span class="type">string</span>,
+                        "surname": <span class="type">string</span>,
+                        "email": <span class="type">string</span>,
+                        "phone_number": <span class="type">string</span>,
+                        "avatar": <span class="type">string (url)</span>
+                        "created_at": <span class="type">date</span>
+                        }
+                }</pre>
+				</div>
+			</div>
 
-    </div>
-    <div>
-        <h3>/api/properties/:id/reviews</h3>
-        <h4><span class="hilight">GET</span></h4>
-        <p>Responds with an array of review JSONs and an average rating:</p>
-        <div class="code_block">
-            <pre class="code_snippet">
+			<h4 class="method"><span class="hilight">PATCH</span></h4>
+			<div class="method_description">
+				<p>
+					Updates a single user's info at a parametric user ID with
+					any of the following body params (in any order):
+				</p>
+				<div class="code_block">
+					<pre class="code_snippet">
             {
-                "reviews": [
-                  {
-                    "review_id": integer,
-                    "comment": string,
-                    "rating": integer,
-                    "created_at": date,
-                    "guest": string,
-                    "guest_avatar" string (url)
-                  },
-                  ...
-                ],
-                "average_rating": float
-              }
-        </pre>
-        </div>
-        <h4><span class="hilight">POST</span></h4>
-        <p>Accepts a review payload with the following shape:</p>
-        <div class="code_block">
-            <pre class="code_snippet">
-            {
-                "guest_id": integer,
-                "rating": integer,
-                "comment": string
-            }
-        </pre>
-        </div>
-        <p>Responds with the newly created review.</p>
-    </div>
-    <div>
-        <h3>/api/properties/:id/favourite</h3>
-        <h4><span class="hilight">POST</span></h4>
-        <p>Accepts a guest_id JSON:</p>
-        <div class="code_block">
-            <pre class="code_snippet">
-            {
-                "guest_id": integer
-            }
-        </pre>
-        </div>
-        <p>Response:</p>
-        <div class="code_block">
-            <pre class="code_snippet">
-            {
-                "msg": "Property favourited successfully.",
-                "favorite_id": integer
+                "first_name": <span class="type">string</span>,
+                "surname": <span class="type">string</span>,
+                "email": <span class="type">string</span>,
+                "phone": <span class="type">string</span>,
+                "avatar": <span class="type">string (url)</span>
             }</pre>
-        </div>
-    </div>
-    <div>
-        <h3>/api/favourites/:id</h3>
-        <h4><span class="hilight">DELETE</span></h4>
-        <p>Removes a favourite at a parametric property ID.</p>
-    </div>
-    <div>
-        <h3>/api/reviews/:id</h3>
-        <h4><span class="hilight">DELETE</span></h4>
-        <p>Removes a review at a parametric property ID.</p>
-    </div>
-    <div>
-        <h3>/api/users/:id</h3>
-        <h4><span class="hilight">GET</span></h4>
-        <p>Reponds with a single user JSON at a parametric user ID:</p>
-        <div class="code_block">
-            <pre class="code_snippet">
-            {
-                "user":  {
-                    "user_id": integer,
-                    "first_name": string,
-                    "surname": string,
-                    "email": string,
-                    "phone_number": string,
-                    "avatar": string (url)
-                    "created_at": date
-                    }
-            }</pre>
-        </div>
-        <h4><span class="hilight">PATCH</span></h4>
-        <p>
-            Updates a single user's info at a parametric user ID with any of
-            the following body params (in any order):
-        </p>
-        <div class="code_block">
-            <pre class="code_snippet">
-            {
-                "first_name": string,
-                "surname": string,
-                "email": string,
-                "phone": string,
-                "avatar": string (url)
-            }</pre>
-        </div>
+				</div>
 
-        <p>Responds with the updated user object.</p>
-    </div>
-</body>
+				<p>Responds with the updated user object.</p>
+			</div>
 
+			<br />
+		</div>
+	</body>
 </html>
