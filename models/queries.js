@@ -36,7 +36,7 @@ SELECT
     FROM images
     WHERE images.property_id = tmp.property_id
     ORDER BY image_id
-    LIMIT 1 ) AS image_url
+    LIMIT 1 ) AS image
 FROM tmp
 JOIN users
 ON users.user_id = tmp.host_id
