@@ -54,6 +54,16 @@ CREATE TABLE images (
     );
 `;
 
+exports.createBookingsQuery = `
+CREATE TABLE bookings (
+    booking_id SERIAL PRIMARY KEY,
+    property_id INTEGER NOT NULL REFERENCES properties,
+    guest_id INTEGER NOT NULL REFERENCES users(user_id),
+    check_in_date DATE NOT NULL,
+    check_out_date DATE NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);`;
+
 exports.insertUsersDataQuery = `
 INSERT INTO users
     (first_name,
@@ -100,4 +110,38 @@ INSERT INTO images (
     image_url,
     alt_text)
 VALUES %L;
+`;
+
+exports.insertBookingsDataQuery = `
+INSERT INTO bookings (
+    property_id,
+    guest_id,
+    check_in_date,
+    check_out_date
+    )
+VALUES %L;`;
+
+exports.checkBookingFuncQuery = `
+CREATE OR REPLACE FUNCTION check_availability() 
+RETURNS TRIGGER AS $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM bookings
+        WHERE booking_id <> NEW.booking_id
+        AND property_id = NEW.property_id
+        AND (NEW.check_in_date, NEW.check_out_date) OVERLAPS (check_in_date, check_out_date)
+    ) THEN
+        RAISE EXCEPTION 'New booking overlaps with existing booking';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+`;
+exports.addBookingsTriggerQuery = `
+CREATE TRIGGER check_available_booking
+BEFORE INSERT OR UPDATE ON bookings
+FOR EACH ROW
+EXECUTE FUNCTION check_availability();
 `;

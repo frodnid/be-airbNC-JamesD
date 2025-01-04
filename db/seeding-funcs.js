@@ -8,6 +8,7 @@ const {
 	reviewsData,
 	favouritesData,
 	imagesData,
+	bookingsData,
 } = require(`${__dirname}/data/${ENV}`);
 const {
 	createUsersQuery,
@@ -16,12 +17,16 @@ const {
 	createReviewsQuery,
 	createFavouritesQuery,
 	createImagesQuery,
+	createBookingsQuery,
 	insertUsersDataQuery,
 	insertPropertiesDataQuery,
 	insertPropertyTypesDataQuery,
 	insertReviewsDataQuery,
 	insertFavouritesDataQuery,
 	insertImagesDataQuery,
+	insertBookingsDataQuery,
+	checkBookingFuncQuery,
+	addBookingsTriggerQuery,
 } = require("./seed-queries");
 const { createUserIDRef, createPropertyIDRef } = require("./data/data-manip");
 
@@ -32,6 +37,9 @@ const queryFormat = function (query, data) {
 exports.dropTables = function () {
 	return db
 		.query(`DROP TABLE IF EXISTS reviews;`)
+		.then(() => {
+			return db.query(`DROP TABLE IF EXISTS bookings;`);
+		})
 		.then(() => {
 			return db.query(`DROP TABLE IF EXISTS images;`);
 		})
@@ -66,6 +74,9 @@ exports.createTables = function () {
 		})
 		.then(() => {
 			return db.query(createImagesQuery);
+		})
+		.then(() => {
+			return db.query(createBookingsQuery);
 		});
 };
 
@@ -125,7 +136,7 @@ exports.insertData = function () {
 			]);
 		})
 		.then(([refs]) => {
-			const propertyIDRef = refs[1];
+			const [userIDRef, propertyIDRef] = refs;
 			const formattedImagesData = imagesData.map((image) => {
 				return [
 					propertyIDRef[image["property_name"]],
@@ -133,6 +144,23 @@ exports.insertData = function () {
 					image.alt_tag,
 				];
 			});
-			return queryFormat(insertImagesDataQuery, formattedImagesData);
+			const formattedBookingsData = bookingsData.map((booking) => {
+				return [
+					propertyIDRef[booking["property_name"]],
+					userIDRef[booking["guest_name"]],
+					booking.check_in_date,
+					booking.check_out_date,
+				];
+			});
+			return Promise.all([
+				queryFormat(insertImagesDataQuery, formattedImagesData),
+				queryFormat(insertBookingsDataQuery, formattedBookingsData),
+			]);
+		})
+		.then(() => {
+			return db.query(checkBookingFuncQuery);
+		})
+		.then(() => {
+			return db.query(addBookingsTriggerQuery);
 		});
 };
