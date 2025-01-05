@@ -6,6 +6,18 @@
     "check_out_date": "2025-12-05"
   },
   {
+    "property_name": "Modern Apartment in City Center",
+    "guest_name": "Bob Smith",
+    "check_in_date": "2025-12-05",
+    "check_out_date": "2025-12-12"
+  },
+  {
+    "property_name": "Modern Apartment in City Center",
+    "guest_name": "Bob Smith",
+    "check_in_date": "2025-12-15",
+    "check_out_date": "2025-12-17"
+  },
+  {
     "property_name": "Cosy Family House",
     "guest_name": "Rachel Cummings",
     "check_in_date": "2025-12-10",

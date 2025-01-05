@@ -6,6 +6,7 @@ const {
 	getPropertyReviews,
 	postPropertyReview,
 } = require("../controllers/reviews");
+const { getPropertyBookings } = require("../controllers/bookings");
 const { handleMethodNotAllowed } = require("../controllers/errors");
 
 const propertiesRouter = express.Router();
@@ -23,6 +24,11 @@ propertiesRouter
 	.route("/:id/reviews")
 	.get(getPropertyReviews)
 	.post(postPropertyReview)
+	.all(handleMethodNotAllowed);
+
+propertiesRouter
+	.route("/:id/bookings")
+	.get(getPropertyBookings)
 	.all(handleMethodNotAllowed);
 
 module.exports = propertiesRouter;

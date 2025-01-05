@@ -103,6 +103,16 @@ WHERE property_id = $1
 ORDER BY reviews.created_at DESC;
 `;
 
+exports.fetchPropertyBookingsQuery = `
+SELECT booking_id,
+    check_in_date,
+    check_out_date,
+    created_at
+FROM bookings
+WHERE property_id = $1
+ORDER BY check_out_date DESC;
+`;
+
 exports.insertReviewQuery = `
 INSERT INTO reviews (
     guest_id,

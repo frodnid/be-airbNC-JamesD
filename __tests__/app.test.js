@@ -86,13 +86,13 @@ describe("app", () => {
 						});
 					});
 			});
-			test("property objects should contain custom property: image_url", () => {
+			test("property objects should contain custom property: image", () => {
 				return request(app)
 					.get("/api/properties")
 					.expect(200)
 					.then(({ body: { properties } }) => {
 						properties.forEach((property) => {
-							expect(property).toHaveProperty("image_url");
+							expect(property).toHaveProperty("image");
 						});
 					});
 			});
@@ -328,6 +328,19 @@ describe("app", () => {
 						expect(property).toHaveProperty("host_avatar");
 						expect(property).toHaveProperty("favourite_count");
 						expect(property).toHaveProperty("images");
+					});
+			});
+			test("images property should contain an array of image urls", () => {
+				const imageUrlRegex =
+					/[(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)(\.jpg|\.png|\.webp|\.svg)/;
+				return request(app)
+					.get("/api/properties/1")
+					.expect(200)
+					.then(({ body: { property } }) => {
+						expect(Array.isArray(property.images)).toBe(true);
+						property.images.forEach((image) => {
+							expect(image).toMatch(imageUrlRegex);
+						});
 					});
 			});
 			test("host property should contain first & surnames concatenated", () => {
@@ -588,6 +601,86 @@ describe("app", () => {
 							});
 					})
 				);
+			});
+		});
+	});
+	describe("/api/properties/:id/bookings", () => {
+		describe("GET", () => {
+			test("200 - should respond with a JSON containing an array of booking objects", () => {
+				return request(app)
+					.get("/api/properties/1/bookings")
+					.expect(200)
+					.expect("Content-type", /json/)
+					.then(({ body }) => {
+						expect(Array.isArray(body.bookings)).toBe(true);
+						body.bookings.forEach((booking) => {
+							expect(typeof booking).toBe("object");
+						});
+					});
+			});
+			test("bookings should contain default db properties: id, check in/ check out date, creation date", () => {
+				return request(app)
+					.get("/api/properties/1/bookings")
+					.expect(200)
+					.expect("Content-type", /json/)
+					.then(({ body: { bookings } }) => {
+						bookings.forEach((booking) => {
+							expect(booking).toHaveProperty("booking_id");
+							expect(booking).toHaveProperty("check_in_date");
+							expect(booking).toHaveProperty("check_out_date");
+							expect(booking).toHaveProperty("created_at");
+						});
+					});
+			});
+			test("should contain no other default db propeties", () => {
+				return request(app)
+					.get("/api/properties/1/bookings")
+					.expect(200)
+					.expect("Content-type", /json/)
+					.then(({ body: { bookings } }) => {
+						bookings.forEach((booking) => {
+							expect(booking).not.toHaveProperty("guest_id");
+							expect(booking).not.toHaveProperty("property_id");
+						});
+					});
+			});
+			test("bookings should be sorted from latest check out date to earliest", () => {
+				return request(app)
+					.get("/api/properties/1/bookings")
+					.expect(200)
+					.expect("Content-type", /json/)
+					.then(({ body: { bookings } }) => {
+						expect(bookings).toBeSortedBy("check_out_date", {
+							descending: true,
+						});
+					});
+			});
+			test("response object should also contain property_id property", () => {
+				return request(app)
+					.get("/api/properties/3/bookings")
+					.expect(200)
+					.expect("Content-type", /json/)
+					.then(({ body }) => {
+						expect(body.property_id).toBe(3);
+					});
+			});
+			test("404 - property id not found", () => {
+				return request(app)
+					.get("/api/properties/4534593/bookings")
+					.expect(404)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("ID not found.");
+					});
+			});
+			test("400 - invalid property id", () => {
+				return request(app)
+					.get("/api/properties/bungalow/bookings")
+					.expect(400)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Bad request.");
+					});
 			});
 		});
 	});
