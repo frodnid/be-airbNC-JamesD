@@ -105,8 +105,8 @@ ORDER BY reviews.created_at DESC;
 
 exports.fetchPropertyBookingsQuery = `
 SELECT booking_id,
-    check_in_date,
-    check_out_date,
+    check_in_date::DATE,
+    check_out_date::DATE,
     created_at
 FROM bookings
 WHERE property_id = $1

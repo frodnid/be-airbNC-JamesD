@@ -994,6 +994,24 @@ describe("app", () => {
 					});
 			});
 		});
+		describe("INVALID METHOD", () => {
+			test("405 - should respond with an error msg for any invalid methods", () => {
+				const invalidMethods = ["post", "patch", "put", "delete"];
+				return Promise.all(
+					invalidMethods.map((method) => {
+						return request(app)
+							[method]("/api/properties/1/bookings")
+							.expect(405)
+							.expect("Content-Type", /json/)
+							.then(({ body: { msg } }) => {
+								expect(msg).toBe("Method not allowed.");
+							});
+					})
+				);
+			});
+		});
+	});
+	describe("/api/properties/:id/booking", () => {
 		describe("POST", () => {
 			const newBooking = {
 				guest_id: 2,
@@ -1002,13 +1020,13 @@ describe("app", () => {
 			};
 			test("201 - should respond with correct status code upon data insertion", () => {
 				return request(app)
-					.post("/api/properties/1/bookings")
+					.post("/api/properties/1/booking")
 					.send(newBooking)
 					.expect(201);
 			});
 			test("should add a booking to the database", () => {
 				return request(app)
-					.post("/api/properties/1/bookings")
+					.post("/api/properties/1/booking")
 					.send(newBooking)
 					.expect(201)
 					.then(() => {
@@ -1020,7 +1038,7 @@ describe("app", () => {
 			});
 			test("should add the correct booking data", () => {
 				return request(app)
-					.post("/api/properties/1/bookings")
+					.post("/api/properties/1/booking")
 					.send(newBooking)
 					.expect(201)
 					.then(() => {
@@ -1034,7 +1052,7 @@ describe("app", () => {
 			});
 			test("response object should contain a relevant msg and the inserted booking_id ", () => {
 				return request(app)
-					.post("/api/properties/1/bookings")
+					.post("/api/properties/1/booking")
 					.send(newBooking)
 					.expect(201)
 					.then(({ body }) => {
@@ -1048,7 +1066,7 @@ describe("app", () => {
 			describe("400 Bad request", () => {
 				test("invalid guest_id", () => {
 					return request(app)
-						.post("/api/properties/1/bookings")
+						.post("/api/properties/1/booking")
 						.send({
 							guest_id: "brian",
 							check_in_date: "2026-01-01",
@@ -1062,7 +1080,7 @@ describe("app", () => {
 				});
 				test("invalid property_id", () => {
 					return request(app)
-						.post("/api/properties/soup/bookings")
+						.post("/api/properties/soup/booking")
 						.send(newBooking)
 						.expect(400)
 						.expect("Content-type", /json/)
@@ -1072,7 +1090,7 @@ describe("app", () => {
 				});
 				test("invalid check in", () => {
 					return request(app)
-						.post("/api/properties/1/bookings")
+						.post("/api/properties/1/booking")
 						.send({
 							guest_id: 1,
 							check_in_date: "sometime",
@@ -1086,7 +1104,7 @@ describe("app", () => {
 				});
 				test("invalid check out", () => {
 					return request(app)
-						.post("/api/properties/1/bookings")
+						.post("/api/properties/1/booking")
 						.send({
 							guest_id: 1,
 							check_in_date: "2026-01-01",
@@ -1100,7 +1118,7 @@ describe("app", () => {
 				});
 				test("invalid interval", () => {
 					return request(app)
-						.post("/api/properties/1/bookings")
+						.post("/api/properties/1/booking")
 						.send({
 							guest_id: 1,
 							check_in_date: "2026-01-10",
@@ -1115,7 +1133,7 @@ describe("app", () => {
 			});
 			test("404 - guest id not found", () => {
 				return request(app)
-					.post("/api/properties/1/bookings")
+					.post("/api/properties/1/booking")
 					.send({
 						guest_id: 99999,
 						check_in_date: "2026-01-01",
@@ -1129,7 +1147,7 @@ describe("app", () => {
 			});
 			test("404 - property id not found", () => {
 				return request(app)
-					.post("/api/properties/9999/bookings")
+					.post("/api/properties/9999/booking")
 					.send({
 						guest_id: 1,
 						check_in_date: "2026-01-01",
@@ -1143,7 +1161,7 @@ describe("app", () => {
 			});
 			test("409 - conflicting booking", () => {
 				return request(app)
-					.post("/api/properties/1/bookings")
+					.post("/api/properties/1/booking")
 					.send({
 						guest_id: 4,
 						check_in_date: "2024-12-06",
@@ -1158,11 +1176,11 @@ describe("app", () => {
 		});
 		describe("INVALID METHOD", () => {
 			test("405 - should respond with an error msg for any invalid methods", () => {
-				const invalidMethods = ["patch", "put", "delete"];
+				const invalidMethods = ["get", "patch", "put", "delete"];
 				return Promise.all(
 					invalidMethods.map((method) => {
 						return request(app)
-							[method]("/api/properties/1/bookings")
+							[method]("/api/properties/1/booking")
 							.expect(405)
 							.expect("Content-Type", /json/)
 							.then(({ body: { msg } }) => {
