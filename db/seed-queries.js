@@ -62,6 +62,7 @@ CREATE TABLE bookings (
     check_in_date DATE NOT NULL,
     check_out_date DATE NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    CONSTRAINT valid_time_interval CHECK (check_in_date < check_out_date)
 );`;
 
 exports.insertUsersDataQuery = `
@@ -132,7 +133,7 @@ BEGIN
         AND property_id = NEW.property_id
         AND (NEW.check_in_date, NEW.check_out_date) OVERLAPS (check_in_date, check_out_date)
     ) THEN
-        RAISE EXCEPTION 'New booking overlaps with existing booking';
+        RAISE EXCEPTION 'New booking overlaps with existing booking' USING DETAIL = 'booking_overlap';
     END IF;
 
     RETURN NEW;

@@ -4,7 +4,8 @@ const {
 	handleBadRequest,
 	handleForeignKey404,
 	handleCustom404,
-	handleConflictingRequest,
+	handleConstraints,
+	handleExceptions
 } = require("./controllers/errors");
 
 const apiRouter = require("./routers/api.router");
@@ -21,7 +22,9 @@ app.use(handleForeignKey404);
 
 app.use(handleCustom404);
 
-app.use(handleConflictingRequest);
+app.use(handleConstraints);
+
+app.use(handleExceptions);
 
 app.all("/*", handlePathNotFound);
 

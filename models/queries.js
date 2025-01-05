@@ -129,6 +129,15 @@ RETURNING
     created_at;
     `;
 
+exports.insertBookingQuery = `
+INSERT INTO bookings (
+    guest_id, 
+    property_id,
+    check_in_date,
+    check_out_date)
+VALUES ($1, $2, $3, $4)
+RETURNING booking_id;
+`
 exports.removeReviewQuery = `
 DELETE FROM reviews
 WHERE review_id = $1

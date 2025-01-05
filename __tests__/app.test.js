@@ -604,147 +604,6 @@ describe("app", () => {
 			});
 		});
 	});
-	describe("/api/properties/:id/bookings", () => {
-		describe("GET", () => {
-			test("200 - should respond with a JSON containing an array of booking objects", () => {
-				return request(app)
-					.get("/api/properties/1/bookings")
-					.expect(200)
-					.expect("Content-type", /json/)
-					.then(({ body }) => {
-						expect(Array.isArray(body.bookings)).toBe(true);
-						body.bookings.forEach((booking) => {
-							expect(typeof booking).toBe("object");
-						});
-					});
-			});
-			test("bookings should contain default db properties: id, check in/ check out date, creation date", () => {
-				return request(app)
-					.get("/api/properties/1/bookings")
-					.expect(200)
-					.expect("Content-type", /json/)
-					.then(({ body: { bookings } }) => {
-						bookings.forEach((booking) => {
-							expect(booking).toHaveProperty("booking_id");
-							expect(booking).toHaveProperty("check_in_date");
-							expect(booking).toHaveProperty("check_out_date");
-							expect(booking).toHaveProperty("created_at");
-						});
-					});
-			});
-			test("should contain no other default db propeties", () => {
-				return request(app)
-					.get("/api/properties/1/bookings")
-					.expect(200)
-					.expect("Content-type", /json/)
-					.then(({ body: { bookings } }) => {
-						bookings.forEach((booking) => {
-							expect(booking).not.toHaveProperty("guest_id");
-							expect(booking).not.toHaveProperty("property_id");
-						});
-					});
-			});
-			test("bookings should be sorted from latest check out date to earliest", () => {
-				return request(app)
-					.get("/api/properties/1/bookings")
-					.expect(200)
-					.expect("Content-type", /json/)
-					.then(({ body: { bookings } }) => {
-						expect(bookings).toBeSortedBy("check_out_date", {
-							descending: true,
-						});
-					});
-			});
-			test("response object should also contain property_id property", () => {
-				return request(app)
-					.get("/api/properties/3/bookings")
-					.expect(200)
-					.expect("Content-type", /json/)
-					.then(({ body }) => {
-						expect(body.property_id).toBe(3);
-					});
-			});
-			test("404 - property id not found", () => {
-				return request(app)
-					.get("/api/properties/4534593/bookings")
-					.expect(404)
-					.expect("Content-type", /json/)
-					.then(({ body: { msg } }) => {
-						expect(msg).toBe("ID not found.");
-					});
-			});
-			test("400 - invalid property id", () => {
-				return request(app)
-					.get("/api/properties/bungalow/bookings")
-					.expect(400)
-					.expect("Content-type", /json/)
-					.then(({ body: { msg } }) => {
-						expect(msg).toBe("Bad request.");
-					});
-			});
-		});
-	});
-	describe("/api/favourites/:id", () => {
-		describe("DELETE", () => {
-			test("204 - should respond with status code 204 on deletion", () => {
-				return request(app).delete("/api/favourites/2").expect(204);
-			});
-			test("response should have no body", () => {
-				return request(app)
-					.delete("/api/favourites/3")
-					.expect(204)
-					.then(({ body }) => {
-						expect(body).toEqual({});
-					});
-			});
-			test("should remove a favourite from the database using the parametric id", () => {
-				return request(app)
-					.delete("/api/favourites/3")
-					.expect(204)
-					.then(() => {
-						return db.query(`SELECT favourite_id FROM favourites;`);
-					})
-					.then(({ rows }) => {
-						expect(rows.length).toBe(14);
-						expect(rows).not.toContainEqual({ favourite_id: 3 });
-					});
-			});
-			test("404 - id not found", () => {
-				return request(app)
-					.delete("/api/favourites/91919191")
-					.expect(404)
-					.expect("Content-type", /json/)
-					.then(({ body: { msg } }) => {
-						expect(msg).toBe("ID not found.");
-					});
-			});
-			test("400 - invalid id type", () => {
-				return request(app)
-					.delete("/api/favourites/colours")
-					.expect(400)
-					.expect("Content-type", /json/)
-					.then(({ body: { msg } }) => {
-						expect(msg).toBe("Bad request.");
-					});
-			});
-		});
-		describe("INVALID METHOD", () => {
-			test("405 - should respond with an error msg for any invalid methods", () => {
-				const invalidMethods = ["get", "patch", "put", "post"];
-				return Promise.all(
-					invalidMethods.map((method) => {
-						return request(app)
-							[method]("/api/favourites/1")
-							.expect(405)
-							.expect("Content-Type", /json/)
-							.then(({ body: { msg } }) => {
-								expect(msg).toBe("Method not allowed.");
-							});
-					})
-				);
-			});
-		});
-	});
 	describe("/api/properties/:id/reviews", () => {
 		describe("GET", () => {
 			test("200 - should respond with a JSON containing an array of review objects", () => {
@@ -1056,6 +915,326 @@ describe("app", () => {
 			});
 		});
 	});
+	describe("/api/properties/:id/bookings", () => {
+		describe("GET", () => {
+			test("200 - should respond with a JSON containing an array of booking objects", () => {
+				return request(app)
+					.get("/api/properties/1/bookings")
+					.expect(200)
+					.expect("Content-type", /json/)
+					.then(({ body }) => {
+						expect(Array.isArray(body.bookings)).toBe(true);
+						body.bookings.forEach((booking) => {
+							expect(typeof booking).toBe("object");
+						});
+					});
+			});
+			test("bookings should contain default db properties: id, check in/ check out date, creation date", () => {
+				return request(app)
+					.get("/api/properties/1/bookings")
+					.expect(200)
+					.expect("Content-type", /json/)
+					.then(({ body: { bookings } }) => {
+						bookings.forEach((booking) => {
+							expect(booking).toHaveProperty("booking_id");
+							expect(booking).toHaveProperty("check_in_date");
+							expect(booking).toHaveProperty("check_out_date");
+							expect(booking).toHaveProperty("created_at");
+						});
+					});
+			});
+			test("should contain no other default db propeties", () => {
+				return request(app)
+					.get("/api/properties/1/bookings")
+					.expect(200)
+					.expect("Content-type", /json/)
+					.then(({ body: { bookings } }) => {
+						bookings.forEach((booking) => {
+							expect(booking).not.toHaveProperty("guest_id");
+							expect(booking).not.toHaveProperty("property_id");
+						});
+					});
+			});
+			test("bookings should be sorted from latest check out date to earliest", () => {
+				return request(app)
+					.get("/api/properties/1/bookings")
+					.expect(200)
+					.expect("Content-type", /json/)
+					.then(({ body: { bookings } }) => {
+						expect(bookings).toBeSortedBy("check_out_date", {
+							descending: true,
+						});
+					});
+			});
+			test("response object should also contain property_id property", () => {
+				return request(app)
+					.get("/api/properties/3/bookings")
+					.expect(200)
+					.expect("Content-type", /json/)
+					.then(({ body }) => {
+						expect(body.property_id).toBe(3);
+					});
+			});
+			test("404 - property id not found", () => {
+				return request(app)
+					.get("/api/properties/4534593/bookings")
+					.expect(404)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("ID not found.");
+					});
+			});
+			test("400 - invalid property id", () => {
+				return request(app)
+					.get("/api/properties/bungalow/bookings")
+					.expect(400)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Bad request.");
+					});
+			});
+		});
+		describe("POST", () => {
+			const newBooking = {
+				guest_id: 2,
+				check_in_date: "2026-01-01",
+				check_out_date: "2026-01-14",
+			};
+			test("201 - should respond with correct status code upon data insertion", () => {
+				return request(app)
+					.post("/api/properties/1/bookings")
+					.send(newBooking)
+					.expect(201);
+			});
+			test("should add a booking to the database", () => {
+				return request(app)
+					.post("/api/properties/1/bookings")
+					.send(newBooking)
+					.expect(201)
+					.then(() => {
+						return db.query(`SELECT booking_id FROM bookings;`);
+					})
+					.then(({ rows }) => {
+						expect(rows.length).toBe(13);
+					});
+			});
+			test("should add the correct booking data", () => {
+				return request(app)
+					.post("/api/properties/1/bookings")
+					.send(newBooking)
+					.expect(201)
+					.then(() => {
+						return db.query(
+							`SELECT guest_id FROM bookings WHERE booking_id = 13;`
+						);
+					})
+					.then(({ rows }) => {
+						expect(rows[0].guest_id).toBe(2);
+					});
+			});
+			test("response object should contain a relevant msg and the inserted booking_id ", () => {
+				return request(app)
+					.post("/api/properties/1/bookings")
+					.send(newBooking)
+					.expect(201)
+					.then(({ body }) => {
+						expect(body).toHaveProperty(
+							"msg",
+							"Booking successful"
+						);
+						expect(body).toHaveProperty("booking_id", 13);
+					});
+			});
+			describe("400 Bad request", () => {
+				test("invalid guest_id", () => {
+					return request(app)
+						.post("/api/properties/1/bookings")
+						.send({
+							guest_id: "brian",
+							check_in_date: "2026-01-01",
+							check_out_date: "2026-01-14",
+						})
+						.expect(400)
+						.expect("Content-type", /json/)
+						.then(({ body: { msg } }) => {
+							expect(msg).toBe("Bad request.");
+						});
+				});
+				test("invalid property_id", () => {
+					return request(app)
+						.post("/api/properties/soup/bookings")
+						.send(newBooking)
+						.expect(400)
+						.expect("Content-type", /json/)
+						.then(({ body: { msg } }) => {
+							expect(msg).toBe("Bad request.");
+						});
+				});
+				test("invalid check in", () => {
+					return request(app)
+						.post("/api/properties/1/bookings")
+						.send({
+							guest_id: 1,
+							check_in_date: "sometime",
+							check_out_date: "2026-01-14",
+						})
+						.expect(400)
+						.expect("Content-type", /json/)
+						.then(({ body: { msg } }) => {
+							expect(msg).toBe("Bad request.");
+						});
+				});
+				test("invalid check out", () => {
+					return request(app)
+						.post("/api/properties/1/bookings")
+						.send({
+							guest_id: 1,
+							check_in_date: "2026-01-01",
+							check_out_date: "in a week",
+						})
+						.expect(400)
+						.expect("Content-type", /json/)
+						.then(({ body: { msg } }) => {
+							expect(msg).toBe("Bad request.");
+						});
+				});
+				test("invalid interval", () => {
+					return request(app)
+						.post("/api/properties/1/bookings")
+						.send({
+							guest_id: 1,
+							check_in_date: "2026-01-10",
+							check_out_date: "2026-01-01",
+						})
+						.expect(400)
+						.expect("Content-type", /json/)
+						.then(({ body: { msg } }) => {
+							expect(msg).toBe("Bad request.");
+						});
+				});
+			});
+			test("404 - guest id not found", () => {
+				return request(app)
+					.post("/api/properties/1/bookings")
+					.send({
+						guest_id: 99999,
+						check_in_date: "2026-01-01",
+						check_out_date: "2026-01-14",
+					})
+					.expect(404)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("ID does not exist.");
+					});
+			});
+			test("404 - property id not found", () => {
+				return request(app)
+					.post("/api/properties/9999/bookings")
+					.send({
+						guest_id: 1,
+						check_in_date: "2026-01-01",
+						check_out_date: "2026-01-14",
+					})
+					.expect(404)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("ID does not exist.");
+					});
+			});
+			test("409 - conflicting booking", () => {
+				return request(app)
+					.post("/api/properties/1/bookings")
+					.send({
+						guest_id: 4,
+						check_in_date: "2024-12-06",
+						check_out_date: "2025-12-07",
+					})
+					.expect(409)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Conflicting request.");
+					});
+			});
+		});
+		describe("INVALID METHOD", () => {
+			test("405 - should respond with an error msg for any invalid methods", () => {
+				const invalidMethods = ["patch", "put", "delete"];
+				return Promise.all(
+					invalidMethods.map((method) => {
+						return request(app)
+							[method]("/api/properties/1/bookings")
+							.expect(405)
+							.expect("Content-Type", /json/)
+							.then(({ body: { msg } }) => {
+								expect(msg).toBe("Method not allowed.");
+							});
+					})
+				);
+			});
+		});
+	});
+	describe("/api/favourites/:id", () => {
+		describe("DELETE", () => {
+			test("204 - should respond with status code 204 on deletion", () => {
+				return request(app).delete("/api/favourites/2").expect(204);
+			});
+			test("response should have no body", () => {
+				return request(app)
+					.delete("/api/favourites/3")
+					.expect(204)
+					.then(({ body }) => {
+						expect(body).toEqual({});
+					});
+			});
+			test("should remove a favourite from the database using the parametric id", () => {
+				return request(app)
+					.delete("/api/favourites/3")
+					.expect(204)
+					.then(() => {
+						return db.query(`SELECT favourite_id FROM favourites;`);
+					})
+					.then(({ rows }) => {
+						expect(rows.length).toBe(14);
+						expect(rows).not.toContainEqual({ favourite_id: 3 });
+					});
+			});
+			test("404 - id not found", () => {
+				return request(app)
+					.delete("/api/favourites/91919191")
+					.expect(404)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("ID not found.");
+					});
+			});
+			test("400 - invalid id type", () => {
+				return request(app)
+					.delete("/api/favourites/colours")
+					.expect(400)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Bad request.");
+					});
+			});
+		});
+		describe("INVALID METHOD", () => {
+			test("405 - should respond with an error msg for any invalid methods", () => {
+				const invalidMethods = ["get", "patch", "put", "post"];
+				return Promise.all(
+					invalidMethods.map((method) => {
+						return request(app)
+							[method]("/api/favourites/1")
+							.expect(405)
+							.expect("Content-Type", /json/)
+							.then(({ body: { msg } }) => {
+								expect(msg).toBe("Method not allowed.");
+							});
+					})
+				);
+			});
+		});
+	});
+
 	describe("/api/review/:id", () => {
 		describe("DELETE", () => {
 			test("204 - should respond with status code 204 on deletion ", () => {

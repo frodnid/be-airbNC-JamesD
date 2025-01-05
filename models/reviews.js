@@ -24,9 +24,7 @@ exports.insertReview = function (property_id, review) {
 	const { guest_id, rating, comment } = review;
 	return db
 		.query(insertReviewQuery, [guest_id, property_id, rating, comment])
-		.then(({ rows }) => {
-			return rows[0];
-		});
+		.then(({ rows }) => rows[0]);
 };
 
 exports.removeReview = function (id) {
