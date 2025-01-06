@@ -137,9 +137,15 @@ INSERT INTO bookings (
     check_out_date)
 VALUES ($1, $2, $3, $4)
 RETURNING booking_id;
-`
+`;
 exports.removeReviewQuery = `
 DELETE FROM reviews
 WHERE review_id = $1
+RETURNING *;
+`;
+
+exports.removeBookingQuery = `
+DELETE FROM bookings
+WHERE booking_id = $1
 RETURNING *;
 `;

@@ -1253,7 +1253,7 @@ describe("app", () => {
 		});
 	});
 
-	describe("/api/review/:id", () => {
+	describe("/api/reviews/:id", () => {
 		describe("DELETE", () => {
 			test("204 - should respond with status code 204 on deletion ", () => {
 				return request(app).delete("/api/reviews/1").expect(204);
@@ -1304,6 +1304,67 @@ describe("app", () => {
 					invalidMethods.map((method) => {
 						return request(app)
 							[method]("/api/reviews/1")
+							.expect(405)
+							.expect("Content-Type", /json/)
+							.then(({ body: { msg } }) => {
+								expect(msg).toBe("Method not allowed.");
+							});
+					})
+				);
+			});
+		});
+	});
+	describe("/api/bookings/:id", () => {
+		describe("DELETE", () => {
+			test("204 - should respond with status code 204 on deletion ", () => {
+				return request(app).delete("/api/bookings/1").expect(204);
+			});
+			test("response should have no body", () => {
+				return request(app)
+					.delete("/api/bookings/3")
+					.expect(204)
+					.then(({ body }) => {
+						expect(body).toEqual({});
+					});
+			});
+			test("should remove a review from the database using the parametric id", () => {
+				return request(app)
+					.delete("/api/bookings/3")
+					.expect(204)
+					.then(() => {
+						return db.query(`SELECT booking_id FROM bookings;`);
+					})
+					.then(({ rows }) => {
+						expect(rows.length).toBe(11);
+						expect(rows).not.toContainEqual({ booking_id: 3 });
+					});
+			});
+			test("404 - id not found", () => {
+				return request(app)
+					.delete("/api/bookings/91919191")
+					.expect(404)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("ID not found.");
+					});
+			});
+			test("400 - invalid id type", () => {
+				return request(app)
+					.delete("/api/bookings/x")
+					.expect(400)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Bad request.");
+					});
+			});
+		});
+		describe("INVALID METHOD", () => {
+			test("405 - should respond with an error msg for any invalid methods", () => {
+				const invalidMethods = ["get", "patch", "put", "post"];
+				return Promise.all(
+					invalidMethods.map((method) => {
+						return request(app)
+							[method]("/api/bookings/1")
 							.expect(405)
 							.expect("Content-Type", /json/)
 							.then(({ body: { msg } }) => {
