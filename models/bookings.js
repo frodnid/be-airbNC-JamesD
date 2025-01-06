@@ -2,12 +2,25 @@ const db = require("../db/connection");
 const _ = require("lodash");
 const {
 	fetchPropertyBookingsQuery,
+	fetchUserBookingsQuery,
 	insertBookingQuery,
 	removeBookingQuery,
 } = require("./queries");
 
 exports.fetchPropertyBookings = function (id) {
 	return db.query(fetchPropertyBookingsQuery, [id]).then(({ rows }) => {
+		if (rows.length === 0) {
+			return Promise.reject({
+				status: 404,
+				msg: "ID not found.",
+			});
+		}
+		return rows;
+	});
+};
+
+exports.fetchUserBookings = function (id) {
+	return db.query(fetchUserBookingsQuery, [id]).then(({ rows }) => {
 		if (rows.length === 0) {
 			return Promise.reject({
 				status: 404,

@@ -1755,4 +1755,119 @@ describe("app", () => {
 			});
 		});
 	});
+	describe("/api/users/:id/bookings", () => {
+		describe("GET", () => {
+			test("200 - should respond with a JSON containing an array of booking objects", () => {
+				return request(app)
+					.get("/api/users/2/bookings")
+					.expect(200)
+					.expect("Content-type", /json/)
+					.then(({ body }) => {
+						expect(Array.isArray(body.bookings)).toBe(true);
+						body.bookings.forEach((booking) => {
+							expect(typeof booking).toBe("object");
+						});
+					});
+			});
+			test("should contain default db properties: booking id, check in, check out, property id", () => {
+				return request(app)
+					.get("/api/users/2/bookings")
+					.expect(200)
+					.then(({ body: { bookings } }) => {
+						bookings.forEach((booking) => {
+							expect(booking).toHaveProperty("booking_id");
+							expect(booking).toHaveProperty("check_in_date");
+							expect(booking).toHaveProperty("check_out_date");
+							expect(booking).toHaveProperty("property_id");
+						});
+					});
+			});
+			test("should not contain default db properties: timestamp, guest id", () => {
+				return request(app)
+					.get("/api/users/2/bookings")
+					.expect(200)
+					.then(({ body: { bookings } }) => {
+						bookings.forEach((booking) => {
+							expect(booking).not.toHaveProperty("guest_id");
+							expect(booking).not.toHaveProperty("created_at");
+						});
+					});
+			});
+			test("should contain custom properties: property name, host, image ", () => {
+				return request(app)
+					.get("/api/users/2/bookings")
+					.expect(200)
+					.then(({ body: { bookings } }) => {
+						bookings.forEach((booking) => {
+							expect(booking).toHaveProperty("property_name");
+							expect(booking).toHaveProperty("host");
+							expect(booking).toHaveProperty("image");
+						});
+					});
+			});
+			test("host should contain first and surnames concatenated", () => {
+				const fullNameRegex = /^[A-Z][a-z]+ [A-Z][a-z]+$/;
+				return request(app)
+					.get("/api/users/2/bookings")
+					.expect(200)
+					.then(({ body: { bookings } }) => {
+						bookings.forEach((booking) => {
+							expect(booking.host).toMatch(fullNameRegex);
+						});
+					});
+			});
+			test("image should contain the first image available of a given property", () => {
+				return request(app)
+					.get("/api/users/2/bookings")
+					.expect(200)
+					.then(({ body: { bookings } }) => {
+						bookings.forEach((booking) => {
+							expect(booking.image).toMatch(/_1.jpg/);
+						});
+					});
+			});
+			test("bookings should be ordered chronologically", () => {
+				return request(app)
+					.get("/api/users/2/bookings")
+					.expect(200)
+					.then(({ body: { bookings } }) => {
+						expect(bookings).toBeSortedBy("check_in_date");
+					});
+			});
+			test("404 - booking_id not found", () => {
+				return request(app)
+					.get("/api/users/1999999/bookings")
+					.expect(404)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("ID not found.");
+					});
+			});
+			test("400 - invalid booking_id", () => {
+				return request(app)
+					.get("/api/users/woweee/bookings")
+					.expect(400)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Bad request.");
+					});
+			});
+		});
+		describe("INVALID METHOD", () => {
+			test("405 - should respond with an error msg for any invalid methods", () => {
+				const invalidMethods = ["patch", "delete", "put", "post"];
+				return Promise.all(
+					invalidMethods.map((method) => {
+						return request(app)
+							[method]("/api/users/2/bookings")
+							.expect(405)
+							.expect("Content-Type", /json/)
+							.then(({ body: { msg } }) => {
+								expect(msg).toBe("Method not allowed.");
+							});
+					})
+				);
+			});
+		});
+	});
 });

@@ -113,6 +113,27 @@ WHERE property_id = $1
 ORDER BY check_out_date DESC;
 `;
 
+exports.fetchUserBookingsQuery = `
+SELECT booking_id,
+    check_in_date,
+    check_out_date,
+    bookings.property_id,
+    name AS property_name,
+    first_name || ' ' || surname AS host, 
+    (   SELECT image_url
+        FROM images
+        WHERE images.property_id = bookings.property_id
+        ORDER BY image_id
+        LIMIT 1 ) 
+    AS image
+FROM bookings
+JOIN properties
+ON bookings.property_id = properties.property_id
+JOIN users
+ON users.user_id = properties.host_id
+WHERE guest_id = $1
+ORDER BY check_in_date;`;
+
 exports.insertReviewQuery = `
 INSERT INTO reviews (
     guest_id,
@@ -149,4 +170,3 @@ DELETE FROM bookings
 WHERE booking_id = $1
 RETURNING *;
 `;
-

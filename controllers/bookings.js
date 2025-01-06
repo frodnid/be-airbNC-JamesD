@@ -1,5 +1,6 @@
 const {
 	fetchPropertyBookings,
+	fetchUserBookings,
 	insertBooking,
 	removeBooking,
 	updateBooking,
@@ -15,6 +16,15 @@ exports.getPropertyBookings = function (req, res, next) {
 			next(err);
 		});
 };
+
+exports.getUserBookings = function(req, res, next) {
+	const { id } = req.params;
+	fetchUserBookings(id).then((bookings) => {
+		res.status(200).send({ bookings });
+	}).catch((err) => {
+		next(err);
+	})
+}
 
 exports.postPropertyBooking = function (req, res, next) {
 	const { id } = req.params;
