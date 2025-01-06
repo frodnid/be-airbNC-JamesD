@@ -149,3 +149,4 @@ DELETE FROM bookings
 WHERE booking_id = $1
 RETURNING *;
 `;
+

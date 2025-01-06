@@ -1358,9 +1358,145 @@ describe("app", () => {
 					});
 			});
 		});
+		describe("PATCH", () => {
+			describe("200 - should succesfully update passed property data in the db at a parametric user id", () => {
+				test("check in", () => {
+					return request(app)
+						.patch("/api/bookings/1")
+						.send({ check_in_date: "2022-01-01" })
+						.expect(200)
+						.then(() => {
+							return db.query(
+								`SELECT check_in_date FROM bookings WHERE booking_id = 1;`
+							);
+						})
+						.then(({ rows }) => {
+							expect(rows[0].check_in_date).toEqual(
+								new Date("2022-01-01")
+							);
+						});
+				});
+				test("check out", () => {
+					return request(app)
+						.patch("/api/bookings/5")
+						.send({ check_out_date: "2026-01-01" })
+						.expect(200)
+						.then(() => {
+							return db.query(
+								`SELECT check_out_date FROM bookings WHERE booking_id = 5;`
+							);
+						})
+						.then(({ rows }) => {
+							expect(rows[0].check_out_date).toEqual(
+								new Date("2026-01-01")
+							);
+						});
+				});
+			});
+			test("should correctly update booking data when passed multiple properties in request body in arbitrary order", () => {
+				return request(app)
+					.patch("/api/bookings/2")
+					.send({
+						check_out_date: "2027-01-12",
+						check_in_date: "2027-01-01",
+					})
+					.expect(200)
+					.then(() => {
+						return db.query(
+							`SELECT * FROM bookings WHERE booking_id = 2;`
+						);
+					})
+					.then(({ rows }) => {
+						expect(rows[0].check_in_date).toEqual(
+							new Date("2027-01-01")
+						);
+						expect(rows[0].check_out_date).toEqual(
+							new Date("2027-01-12")
+						);
+					});
+			});
+			test("should respond with a booking object", () => {
+				return request(app)
+					.patch("/api/bookings/4")
+					.send({ check_out_date: "2027-01-12" })
+					.expect(200)
+					.expect("Content-type", /json/)
+					.then(({ body: { booking } }) => {
+						expect(typeof booking).toBe("object");
+					});
+			});
+			test("response object should contain a full db entry for the updated booking", () => {
+				return request(app)
+					.patch("/api/bookings/4")
+					.send({
+						check_out_date: "2027-01-12",
+						check_in_date: "2027-01-02",
+					})
+					.expect(200)
+					.expect("Content-type", /json/)
+					.then(({ body: { booking } }) => {
+						expect(booking).toEqual({
+							booking_id: 4,
+							property_id: 2,
+							guest_id: 6,
+							check_in_date: "2027-01-02T00:00:00.000Z",
+							check_out_date: "2027-01-12T00:00:00.000Z",
+							created_at: expect.any(String),
+						});
+					});
+			});
+			test("400 - invalid body property", () => {
+				return request(app)
+					.patch("/api/bookings/1")
+					.send({ chocolate: "bar" })
+					.expect(400)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Bad request.");
+					});
+			});
+			test("404 - booking_id not found", () => {
+				return request(app)
+					.patch("/api/bookings/1999999")
+					.send({ check_in_date: "2025-01-01" })
+					.expect(404)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("ID not found.");
+					});
+			});
+			test("400 - invalid booking_id", () => {
+				return request(app)
+					.patch("/api/bookings/fishcakes")
+					.send({ check_in_date: "2025-01-01" })
+					.expect(400)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Bad request.");
+					});
+			});
+			test("400 - invalid time interval", () => {
+				return request(app)
+					.patch("/api/bookings/4")
+					.send({ check_in_date: "2025-12-16" })
+					.expect(400)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Bad request.");
+					});
+			});
+			test("409 - overlapping booking", () => {
+				return request(app)
+					.patch("/api/bookings/1")
+					.send({ check_out_date: "2025-12-06" })
+					.expect(409)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Conflicting request.");
+					});
+			});
+		});
 		describe("INVALID METHOD", () => {
 			test("405 - should respond with an error msg for any invalid methods", () => {
-				const invalidMethods = ["get", "patch", "put", "post"];
+				const invalidMethods = ["get", "put", "post"];
 				return Promise.all(
 					invalidMethods.map((method) => {
 						return request(app)

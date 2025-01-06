@@ -2,6 +2,7 @@ const {
 	fetchPropertyBookings,
 	insertBooking,
 	removeBooking,
+	updateBooking,
 } = require("../models/bookings");
 
 exports.getPropertyBookings = function (req, res, next) {
@@ -32,6 +33,18 @@ exports.deleteBooking = function (req, res, next) {
 	removeBooking(id)
 		.then(() => {
 			res.status(204).send();
+		})
+		.catch((err) => {
+			next(err);
+		});
+};
+
+exports.patchBooking = function (req, res, next) {
+	const { id } = req.params;
+	const payload = req.body;
+	updateBooking(id, payload)
+		.then((booking) => {
+			res.status(200).send({ booking });
 		})
 		.catch((err) => {
 			next(err);

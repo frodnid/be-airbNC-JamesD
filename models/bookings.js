@@ -1,4 +1,5 @@
 const db = require("../db/connection");
+const _ = require("lodash");
 const {
 	fetchPropertyBookingsQuery,
 	insertBookingQuery,
@@ -37,5 +38,27 @@ exports.removeBooking = function (id) {
 				msg: "ID not found.",
 			});
 		}
+	});
+};
+
+exports.updateBooking = function (id, columns) {
+	let columnUpdateString = "SET ";
+	for (const column in columns) {
+		const value = columns[column];
+		columnUpdateString += `${column} = '${value}', `;
+	}
+	const queryString = `
+    UPDATE bookings
+    ${columnUpdateString.slice(0, -2)}
+    WHERE booking_id = $1
+    RETURNING *;`;
+	return db.query(queryString, [id]).then(({ rows }) => {
+		if (_.isEmpty(rows[0])) {
+			return Promise.reject({
+				status: 404,
+				msg: "ID not found.",
+			});
+		}
+		return rows[0];
 	});
 };
