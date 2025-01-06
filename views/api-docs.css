@@ -39,7 +39,6 @@ div h4 {
 	padding-top: 0.5rem;
     margin-left: 4rem;
     margin-right: 4rem;
-
 }
 
 span.hilight {
@@ -59,20 +58,23 @@ p {
     margin-right: 4rem;
 	padding-bottom: 1rem;
 	overflow-wrap: break-word;
-
 }
 
 div li {
 	font-family: "Courier New", Courier, monospace;
     margin-left: 4rem;
     margin-right: 4rem;
-
 }
 
 pre.code_snippet {
 	font-family: "Courier New", Courier, monospace;
 	font-size: 0.8rem;
 	color: aliceblue;
+	white-space: pre-wrap; 
+	overflow-wrap: break-word; 
+	padding: 0.5rem 1rem; 
+	margin: 0; 
+	line-height: 1.5;
 }
 
 div.code_block {

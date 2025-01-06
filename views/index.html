@@ -24,19 +24,20 @@
 				</p>
 				<div class="code_block">
 					<pre class="code_snippet">
-                    {
-                        "properties": [
-                          {
-                            "property_id": <span class="type">integer</span>,
-                            "property_name": <span class="type">string</span>,
-                            "location": <span class="type">string</span>,
-                            "price_per_night": <span class="type">float</span>,
-                            "host": <span class="type">string</span>,
-							"image": <span class="type">string (url)</span>
-                          },
-                          ...
-                        ]
-                    }</pre>
+{
+	"properties": [
+		{
+			"property_id": <span class="type">integer</span>,
+			"property_name": <span class="type">string</span>,
+			"location": <span class="type">string</span>,
+			"price_per_night": <span class="type">float</span>,
+			"host": <span class="type">string</span>,
+			"image": <span class="type">string (url)</span>
+		},
+		...
+	]
+}
+					</pre>
 				</div>
 
 				<h4>Queries:</h4>
@@ -56,18 +57,18 @@
 				<p>Responds with a property JSON:</p>
 				<div class="code_block">
 					<pre class="code_snippet">
-                {  
-                    "property_id": <span class="type">integer</span>,
-                    "property_name": <span class="type">string</span>,
-                    "location": <span class="type">string</span>,
-                    "price_per_night": <span class="type">float</span>,
-                    "description": <span class="type">string</span>,
-                    "host": <span class="type">string</span>,
-                    "host_avatar" <span class="type">string (url)</span>,
-                    "favourite_count": <span class="type">integer</span>,
-					"images": <span class="type">array[string (url)]</span>
-                }
-            </pre>
+{  
+	"property_id": <span class="type">integer</span>,
+	"property_name": <span class="type">string</span>,
+	"location": <span class="type">string</span>,
+	"price_per_night": <span class="type">float</span>,
+	"description": <span class="type">string</span>,
+	"host": <span class="type">string</span>,
+	"host_avatar": <span class="type">string (url)</span>,
+	"favourite_count": <span class="type">integer</span>,
+	"images": <span class="type">array[string (url)]</span>
+}
+					</pre>
 				</div>
 				<h4>Queries:</h4>
 				<ul>
@@ -81,12 +82,13 @@
 				</p>
 				<div class="code_block">
 					<pre class="code_snippet">
-                {
-                    "property":   {
-                     // regular fields...,
-                     "favourited": <span class="type">boolean</span>
-                    }
-                }</pre>
+{
+	"property": {
+		// regular fields...,
+		"favourited": <span class="type">boolean</span>
+	}
+}
+					</pre>
 				</div>
 			</div>
 		</div>
@@ -101,22 +103,21 @@
 				</p>
 				<div class="code_block">
 					<pre class="code_snippet">
-                {
-                    "reviews": [
-                      {
-                        "review_id": <span class="type">integer</span>,
-                        "comment": <span class="type">string</span>,
-                        "rating": <span class="type">integer</span>,
-                        "created_at": <span class="type">date</span>,
-                        "guest": <span class="type">string</span>,
-                        "guest_avatar" <span class="type">string (url)</span>
-                      },
-                      ...
-                    ],
-
-                    "average_rating": <span class="type">float</span>
-                  }
-            </pre>
+{
+	"reviews": [
+		{
+			"review_id": <span class="type">integer</span>,
+			"comment": <span class="type">string</span>,
+			"rating": <span class="type">integer</span>,
+			"created_at": <span class="type">date</span>,
+			"guest": <span class="type">string</span>,
+			"guest_avatar": <span class="type">string (url)</span>
+		},
+		...
+	],
+	"average_rating": <span class="type">float</span>
+}
+					</pre>
 				</div>
 			</div>
 
@@ -125,17 +126,73 @@
 				<p>Accepts a review payload with the following shape:</p>
 				<div class="code_block">
 					<pre class="code_snippet">
-                {
-                    "guest_id": <span class="type">integer</span>,
-                    "rating": <span class="type">integer</span>,
-                    "comment": <span class="type">string</span>
-                }
-            </pre>
+{
+	"guest_id": <span class="type">integer</span>,
+	"rating": <span class="type">integer</span>,
+	"comment": <span class="type">string</span>
+}
+					</pre>
 				</div>
 				<p>Responds with the newly created review.</p>
 			</div>
 		</div>
 		<br />
+		<div>
+			<h3>/api/properties/:id/bookings</h3>
+			<h4 class="method"><span class="hilight">GET</span></h4>
+			<div class="method_description">
+				<p>
+					Responds with an array of booking JSONs for a given property:
+				</p>
+				<div class="code_block">
+					<pre class="code_snippet">
+{
+	"bookings": [
+		{
+			"booking_id": <span class="type">integer</span>,
+			"check_in_date": <span class="type">date</span>,
+			"check_out_date": <span class="type">date</span>,
+			"created_at": <span class="type">date</span>,
+		},
+		...
+	],
+	"property_id": <span class="type">integer</span>
+}
+					</pre>
+				</div>
+				<p>
+					Bookings are ordered by check out date, latest to oldest.
+				</p>
+			</div>
+		</div>
+		<br />
+		<div>
+			<h3>/api/properties/:id/booking</h3>
+			<h4 class="method"><span class="hilight">POST</span></h4>
+			<div class="method_description">
+				<p>
+					Adds a booking object of the following shape to the database:
+				</p>
+				<div class="code_block">
+					<pre class="code_snippet">
+{
+	"guest_id": <span class="type">integer</span>,
+	"check_in_date": <span class="type">date</span>,
+	"check_out_date": <span class="type">date</span>
+}
+					</pre>
+				</div>
+				<p>Response:</p>
+				<div class="code_block">
+					<pre class="code_snippet">
+{
+	"msg": "Booking successful.",
+	"booking_id": <span class="type">integer</span>
+}
+					</pre>
+				</div>
+			</div>
+		</div>
 		<div>
 			<h3>/api/properties/:id/favourite</h3>
 			<h4 class="method"><span class="hilight">POST</span></h4>
@@ -143,18 +200,19 @@
 				<p>Accepts a guest_id JSON:</p>
 				<div class="code_block">
 					<pre class="code_snippet">
-                {
-                    "guest_id": <span class="type">integer</span>
-                }
-            </pre>
+{
+	"guest_id": <span class="type">integer</span>
+}
+					</pre>
 				</div>
 				<p>Response:</p>
 				<div class="code_block">
 					<pre class="code_snippet">
-                {
-                    "msg": "Property favourited successfully.",
-                    "favorite_id": <span class="type">integer</span>
-                }</pre>
+{
+	"msg": "Property favourited successfully.",
+	"favorite_id": <span class="type">integer</span>
+}
+					</pre>
 				</div>
 			</div>
 		</div>
@@ -163,7 +221,7 @@
 			<h3>/api/favourites/:id</h3>
 			<h4 class="method"><span class="hilight">DELETE</span></h4>
 			<div class="method_description">
-				<p>Removes a favourite at a parametric property ID.</p>
+				<p>Removes a favourite at a parametric favourite ID.</p>
 			</div>
 		</div>
 		<br />
@@ -171,7 +229,32 @@
 			<h3>/api/reviews/:id</h3>
 			<h4 class="method"><span class="hilight">DELETE</span></h4>
 			<div class="method_description">
-				<p>Removes a review at a parametric property ID.</p>
+				<p>Removes a review at a parametric review ID.</p>
+			</div>
+		</div>
+		<br />
+		<div>
+			<h3>/api/bookings/:id</h3>
+			<h4 class="method"><span class="hilight">PATCH</span></h4>
+			<div class="method_description">
+				<p>
+					Updates booking info at a given ID with
+					any of the following body params (in any order):
+				</p>
+				<div class="code_block">
+					<pre class="code_snippet">
+{
+	"check_in_date": <span class="type">date</span>,
+	"check_out_date": <span class="type">date</span>
+}
+					</pre>
+				</div>
+
+				<p>Responds with the updated booking object.</p>
+			</div>
+			<h4 class="method"><span class="hilight">DELETE</span></h4>
+			<div class="method_description">
+				<p>Removes a booking at a parametric booking ID.</p>
 			</div>
 		</div>
 		<br />
@@ -182,17 +265,18 @@
 				<p>Reponds with a single user JSON at a parametric user ID:</p>
 				<div class="code_block">
 					<pre class="code_snippet">
-                {
-                    "user":  {
-                        "user_id": <span class="type">integer</span>,
-                        "first_name": <span class="type">string</span>,
-                        "surname": <span class="type">string</span>,
-                        "email": <span class="type">string</span>,
-                        "phone_number": <span class="type">string</span>,
-                        "avatar": <span class="type">string (url)</span>
-                        "created_at": <span class="type">date</span>
-                        }
-                }</pre>
+{
+	"user": {
+		"user_id": <span class="type">integer</span>,
+		"first_name": <span class="type">string</span>,
+		"surname": <span class="type">string</span>,
+		"email": <span class="type">string</span>,
+		"phone_number": <span class="type">string</span>,
+		"avatar": <span class="type">string (url)</span>,
+		"created_at": <span class="type">date</span>
+	}
+}
+					</pre>
 				</div>
 			</div>
 
@@ -204,18 +288,45 @@
 				</p>
 				<div class="code_block">
 					<pre class="code_snippet">
-            {
-                "first_name": <span class="type">string</span>,
-                "surname": <span class="type">string</span>,
-                "email": <span class="type">string</span>,
-                "phone": <span class="type">string</span>,
-                "avatar": <span class="type">string (url)</span>
-            }</pre>
+{
+	"first_name": <span class="type">string</span>,
+	"surname": <span class="type">string</span>,
+	"email": <span class="type">string</span>,
+	"phone": <span class="type">string</span>,
+	"avatar": <span class="type">string (url)</span>
+}
+					</pre>
 				</div>
 
 				<p>Responds with the updated user object.</p>
 			</div>
 
+			<br />
+		</div>
+		<div>
+			<h3>/api/users/:id/bookings</h3>
+			<h4 class="method"><span class="hilight">GET</span></h4>
+			<div class="method_description">
+				<p>Reponds with an array of booking objects for a given user ID:</p>
+				<div class="code_block">
+					<pre class="code_snippet">
+{
+	"bookings": [
+		{
+			"booking_id": <span class="type">integer</span>,
+			"check_in_date": <span class="type">date</span>,
+			"check_out_date": <span class="type">date</span>,
+			"property_id": <span class="type">integer</span>,
+			"property_name": <span class="type">string</span>,
+			"host": <span class="type">string</span>,
+			"image": <span class="type">string (url)</span>
+		},
+		...
+	]
+}
+					</pre>
+				</div>
+			</div>
 			<br />
 		</div>
 	</body>
