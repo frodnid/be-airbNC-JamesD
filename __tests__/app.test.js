@@ -1870,4 +1870,76 @@ describe("app", () => {
 			});
 		});
 	});
+	describe.only("/api/users/:id/favourites", () => {
+		describe("GET", () => {
+			test("200 - should respond with a JSON containing an array favourite objects", () => {
+				return request(app)
+					.get("/api/users/2/favourites")
+					.expect(200)
+					.expect("Content-type", /json/)
+					.then(({ body }) => {
+						expect(Array.isArray(body.favourites)).toBe(true);
+						body.favourites.forEach((favourite) => {
+							expect(typeof favourite).toBe("object");
+						});
+					});
+			});
+			test("should contain default db properties: property id, favourite id", () => {
+				return request(app)
+					.get("/api/users/2/favourites")
+					.expect(200)
+					.then(({ body: { favourites } }) => {
+						favourites.forEach((favourite) => {
+							expect(favourite).toHaveProperty("favourite_id");
+							expect(favourite).toHaveProperty("property_id");
+						});
+					});
+			});
+			test("should not contain default db properties: guest id", () => {
+				return request(app)
+					.get("/api/users/2/favourites")
+					.expect(200)
+					.then(({ body: { favourites } }) => {
+						favourites.forEach((favourite) => {
+							expect(favourite).not.toHaveProperty("guest_id");
+						});
+					});
+			});
+
+			test("404 - user_id not found", () => {
+				return request(app)
+					.get("/api/users/1999999/favourites")
+					.expect(404)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("ID not found.");
+					});
+			});
+			test("400 - invalid user_id", () => {
+				return request(app)
+					.get("/api/users/woweee/favourites")
+					.expect(400)
+					.expect("Content-type", /json/)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Bad request.");
+					});
+			});
+		});
+		describe("INVALID METHOD", () => {
+			test("405 - should respond with an error msg for any invalid methods", () => {
+				const invalidMethods = ["patch", "delete", "put", "post"];
+				return Promise.all(
+					invalidMethods.map((method) => {
+						return request(app)
+							[method]("/api/users/2/favourites")
+							.expect(405)
+							.expect("Content-Type", /json/)
+							.then(({ body: { msg } }) => {
+								expect(msg).toBe("Method not allowed.");
+							});
+					})
+				);
+			});
+		});
+	});
 });

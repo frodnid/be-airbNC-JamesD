@@ -1,4 +1,8 @@
-const { insertFavourite, removeFavourite } = require("../models/favourites");
+const {
+	insertFavourite,
+	removeFavourite,
+	fetchUserFavourites,
+} = require("../models/favourites");
 exports.postFavourite = function (req, res, next) {
 	const { guest_id } = req.body;
 	const property_id = req.params.id;
@@ -19,6 +23,18 @@ exports.deleteFavourite = function (req, res, next) {
 	removeFavourite(id)
 		.then(() => {
 			res.status(204).send();
+		})
+		.catch((err) => {
+			next(err);
+		});
+};
+
+exports.getUserFavourites = function (req, res, next) {
+	const { id } = req.params;
+
+	fetchUserFavourites(id)
+		.then((favourites) => {
+			res.status(200).send({ favourites });
 		})
 		.catch((err) => {
 			next(err);

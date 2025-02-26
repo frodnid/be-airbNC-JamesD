@@ -1,5 +1,9 @@
 const db = require("../db/connection");
-const { insertFavouriteQuery, removeFavouriteQuery } = require("./queries");
+const {
+	insertFavouriteQuery,
+	removeFavouriteQuery,
+	fetchUserFavouritesQuery,
+} = require("./queries");
 
 exports.insertFavourite = function (guest_id, property_id) {
 	return db
@@ -15,5 +19,17 @@ exports.removeFavourite = function (id) {
 				msg: "ID not found.",
 			});
 		}
+	});
+};
+
+exports.fetchUserFavourites = function (id) {
+	return db.query(fetchUserFavouritesQuery, [id]).then(({ rows }) => {
+		if (rows.length === 0) {
+			return Promise.reject({
+				status: 404,
+				msg: "ID not found.",
+			});
+		}
+		return rows;
 	});
 };

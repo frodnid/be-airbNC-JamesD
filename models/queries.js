@@ -134,6 +134,12 @@ ON users.user_id = properties.host_id
 WHERE guest_id = $1
 ORDER BY check_in_date;`;
 
+exports.fetchUserFavouritesQuery = `
+SELECT favourite_id,
+    property_id
+    FROM favourites
+    WHERE guest_id = $1;`;
+
 exports.insertReviewQuery = `
 INSERT INTO reviews (
     guest_id,
